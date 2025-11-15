@@ -1,0 +1,52 @@
+services:
+  unidash-app:
+    container_name: unidash-app
+    build:
+      context: .
+      dockerfile: Dockerfile.prod
+      target: production # Use the 'production' stage from Dockerfile.prod for production
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+    restart: unless-stopped
+    networks:
+      - gdmarket-network
+
+  nginx:
+    image: nginx:latest
+    container_name: nginx
+    volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf
+      - ./certbot/conf:/etc/letsencrypt
+      - ./certbot/www:/var/www/certbot
+    ports:
+      - "80:80"
+      - "443:443"
+    depends_on:
+      - unidash-app
+      # - certbot
+    networks:
+      - gdmarket-network
+
+  certbot:
+    image: certbot/certbot
+    container_name: certbot
+    volumes:
+      - ./certbot/conf:/etc/letsencrypt
+      - ./certbot/www:/var/www/certbot
+    # entrypoint: /bin/sh -c "trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;"
+    entrypoint: >
+      certbot certonly --webroot
+      -w /var/www/certbot
+      -d unidash.com.br
+      -d www.unidash.com.br
+      --non-interactive
+      --agree-tos
+      --email marcosphip7@gmail.com
+    networks:
+      - unidash-network
+
+networks:
+  gdmarket-network:
+    driver: bridge

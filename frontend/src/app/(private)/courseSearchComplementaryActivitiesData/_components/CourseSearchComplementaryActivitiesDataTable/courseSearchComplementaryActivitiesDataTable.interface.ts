@@ -1,0 +1,5 @@
+import { CourseSearchComplementaryActivitiesListDataResponse } from "@unidash/api/responses/courseSearchComplementaryActivitiesDataResponse.interface";
+
+export interface CourseSearchComplementaryActivitiesDataTableProps {
+  courseSearchComplementaryActivitiesData: CourseSearchComplementaryActivitiesListDataResponse["courseSearchComplementaryActivitiesData"];
+}

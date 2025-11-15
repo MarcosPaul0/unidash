@@ -1,0 +1,179 @@
+"use client";
+
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  CardInputsRow,
+  CardTitle,
+} from "@unidash/components/Card";
+import { useForm, FormProvider } from "react-hook-form";
+import { FormInput } from "@unidash/components/FormInput";
+import { Button } from "@unidash/components/Button";
+import { FloppyDiskIcon } from "@phosphor-icons/react/dist/ssr";
+import {
+  RegisterCourseRegistrationLockDataDto,
+  courseRegistrationLockDataDtoSchema,
+} from "@unidash/api/dtos/courseRegistrationLockData.dto";
+import { useCourseStore } from "@unidash/store/course.store";
+import { Toast } from "@unidash/utils/toast.util";
+import { CourseRegistrationLockDataCSService } from "@unidash/services/courseRegistrationLockData/courseRegistrationLockData.cs.service";
+import { ExceptionHandler } from "@unidash/api/errors/exception.handler";
+import { HTTP_STATUS } from "@unidash/lib/baseApiClient";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { PeriodForm } from "@unidash/app/(private)/courseStudentsData/_components/PeriodForm";
+import { EditCourseRegistrationLockDataFormProps } from "./editCourseRegistrationLockDataForm.interface";
+
+const UPDATE_COURSE_REGISTRATION_LOCK_DATA_SUCCESS_MESSAGE =
+  "Registro de trancamentos do curso foi atualizado!";
+
+const UPDATE_COURSE_REGISTRATION_LOCK_DATA_ERROR_MESSAGES = {
+  [HTTP_STATUS.forbidden]:
+    "Você não tem permissão para realizar essa operação!",
+  [HTTP_STATUS.notFound]:
+    "O registro de trancamentos do curso informado não foi encontrado!",
+  [HTTP_STATUS.badRequest]: "Ocorreu algum erro ao atualizar as informações!",
+} as const;
+
+export function EditCourseRegistrationLockDataForm({
+  courseRegistrationLockData,
+}: EditCourseRegistrationLockDataFormProps) {
+  const { activeCourse } = useCourseStore();
+
+  const formMethods = useForm<RegisterCourseRegistrationLockDataDto>({
+    resolver: zodResolver(courseRegistrationLockDataDtoSchema),
+    defaultValues: {
+      semester: courseRegistrationLockData.semester,
+      year: String(courseRegistrationLockData.year) as unknown as number,
+      difficultyInDiscipline: courseRegistrationLockData.difficultyInDiscipline,
+      incompatibilityWithWork:
+        courseRegistrationLockData.incompatibilityWithWork,
+      lossOfInterest: courseRegistrationLockData.lossOfInterest,
+      other: courseRegistrationLockData.other,
+      teacherMethodology: courseRegistrationLockData.teacherMethodology,
+      workload: courseRegistrationLockData.workload,
+    },
+  });
+
+  const {
+    control,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = formMethods;
+
+  async function sendCourseRegistrationLockData(
+    registerCourseRegistrationLockDataDto: RegisterCourseRegistrationLockDataDto
+  ) {
+    try {
+      if (!activeCourse) {
+        Toast.error(
+          "É necessário selecionar o curso para registrar as informações!"
+        );
+        return;
+      }
+
+      await CourseRegistrationLockDataCSService.update(
+        courseRegistrationLockData.id,
+        registerCourseRegistrationLockDataDto
+      );
+
+      Toast.success(UPDATE_COURSE_REGISTRATION_LOCK_DATA_SUCCESS_MESSAGE);
+    } catch (error) {
+      ExceptionHandler.handle({
+        error,
+        errorMap: UPDATE_COURSE_REGISTRATION_LOCK_DATA_ERROR_MESSAGES,
+        onError: (handledError) => {
+          Toast.error(handledError.message);
+        },
+      });
+    }
+  }
+
+  return (
+    <FormProvider {...formMethods}>
+      <form onSubmit={handleSubmit(sendCourseRegistrationLockData)}>
+        <Card>
+          <CardHeader>
+            <CardTitle>
+              Atualize as informações de trancamentos do curso de{" "}
+              {activeCourse?.name}
+            </CardTitle>
+          </CardHeader>
+
+          <CardContent className="flex flex-col gap-4 md:gap-8">
+            <PeriodForm />
+
+            <CardInputsRow>
+              <FormInput
+                control={control}
+                type="number"
+                name="difficultyInDiscipline"
+                placeholder="Quantidade por dificuldades na disciplina"
+                label="Dificuldades na disciplina"
+                helper={errors.difficultyInDiscipline?.message}
+              />
+              <FormInput
+                control={control}
+                type="number"
+                name="incompatibilityWithWork"
+                placeholder="Quantidade por incompatibilidade com trabalho"
+                label="Incompatibilidade com trabalho"
+                helper={errors.incompatibilityWithWork?.message}
+              />
+            </CardInputsRow>
+
+            <CardInputsRow>
+              <FormInput
+                control={control}
+                type="number"
+                name="lossOfInterest"
+                placeholder="Quantidade por perda de interesse"
+                label="Perdas de interesse"
+                helper={errors.lossOfInterest?.message}
+              />
+              <FormInput
+                control={control}
+                type="number"
+                name="teacherMethodology"
+                placeholder="Quantidade por metodologia do professor"
+                label="Metodologia do professor"
+                helper={errors.teacherMethodology?.message}
+              />
+            </CardInputsRow>
+
+            <CardInputsRow>
+              <FormInput
+                control={control}
+                type="number"
+                name="workload"
+                placeholder="Quantidade por carga horária"
+                label="Carga horária"
+                helper={errors.workload?.message}
+              />
+              <FormInput
+                control={control}
+                type="number"
+                name="other"
+                placeholder="Quantidade por outros motivos"
+                label="Outros motivos"
+                helper={errors.other?.message}
+              />
+            </CardInputsRow>
+          </CardContent>
+
+          <CardFooter className="gap-6">
+            <Button
+              className="w-full max-w-80"
+              size="lg"
+              isLoading={isSubmitting}
+            >
+              <FloppyDiskIcon />
+              Atualizar dados
+            </Button>
+          </CardFooter>
+        </Card>
+      </form>
+    </FormProvider>
+  );
+}

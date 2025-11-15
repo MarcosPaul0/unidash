@@ -1,0 +1,5 @@
+import { CourseExtensionComplementaryActivitiesDataResponse } from "@unidash/api/responses/courseExtensionComplementaryActivitiesDataResponse.interface";
+
+export interface EditCourseExtensionComplementaryActivitiesDataFormProps {
+  courseExtensionComplementaryActivitiesData: CourseExtensionComplementaryActivitiesDataResponse["courseExtensionComplementaryActivitiesData"];
+}

@@ -1,0 +1,22 @@
+services:
+  unidash-app:
+    container_name: unidash
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    ports:
+      - "3001:3000"
+    environment:
+      - NODE_ENV=development
+      - CHOKIDAR_USEPOLLING=true
+    volumes:
+      - .:/app
+      - /app/node_modules
+    restart: always
+    networks:
+      - frontend-unidash
+
+networks:
+  frontend-unidash:
+    name: unidash-network
+    external: true

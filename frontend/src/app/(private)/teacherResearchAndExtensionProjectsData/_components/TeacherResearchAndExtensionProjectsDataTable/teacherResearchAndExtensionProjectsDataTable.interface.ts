@@ -1,0 +1,5 @@
+import { TeacherResearchAndExtensionProjectsDataResponse } from "@unidash/api/responses/teacherResearchAndExtensionProjectsDataResponse.interface";
+
+export interface TeacherResearchAndExtensionProjectsDataTableProps {
+  teacherResearchAndExtensionProjectsData: TeacherResearchAndExtensionProjectsDataResponse["teacherResearchAndExtensionProjectsData"];
+}
