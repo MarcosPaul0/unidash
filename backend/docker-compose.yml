@@ -31,28 +31,28 @@ services:
     networks:
       - backend-unidash
 
-  pgadmin:
-    image: dpage/pgadmin4
-    container_name: pgadmin
-    environment:
-      PGADMIN_DEFAULT_EMAIL: admin@unidash.com
-      PGADMIN_DEFAULT_PASSWORD: unidash
-    ports:
-      - 5050:80
-    volumes:
-      - ./pgadmin:/var/lib/pgadmin
-    networks:
-      - backend-unidash
-
-  # mailhog:
-  #   image: mailhog/mailhog
-  #   container_name: mailhog
-  #   restart: 'no'
+  # pgadmin:
+  #   image: dpage/pgadmin4
+  #   container_name: pgadmin
+  #   environment:
+  #     PGADMIN_DEFAULT_EMAIL: admin@unidash.com
+  #     PGADMIN_DEFAULT_PASSWORD: unidash
   #   ports:
-  #     - 1025:1025 # SMTP
-  #     - 8025:8025 # Web UI
+  #     - 5050:80
+  #   volumes:
+  #     - ./pgadmin:/var/lib/pgadmin
   #   networks:
   #     - backend-unidash
+
+  mailhog:
+    image: mailhog/mailhog
+    container_name: mailhog
+    restart: 'no'
+    ports:
+      - 1025:1025 # SMTP
+      - 8025:8025 # Web UI
+    networks:
+      - backend-unidash
 
 networks:
   backend-unidash:
@@ -61,4 +61,4 @@ networks:
 
 volumes:
   postgres:
-  pgadmin:
+  # pgadmin:
