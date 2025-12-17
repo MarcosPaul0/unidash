@@ -59,6 +59,7 @@ model Teacher {
 
 enum StudentType {
   incomingStudent
+  regularStudent
   outgoingStudent
 }
 

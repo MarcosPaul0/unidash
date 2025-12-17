@@ -1,10 +1,11 @@
-import { UniqueEntityId } from '@/core/entities/unique-entity-id';
-import { User, UserProps } from './user';
-import { Optional } from '@/core/types/optional';
+import { UniqueEntityId } from "@/core/entities/unique-entity-id";
+import { User, UserProps } from "./user";
+import { Optional } from "@/core/types/optional";
 
 export const STUDENT_TYPE = {
-  incomingStudent: 'incomingStudent',
-  outgoingStudent: 'outgoingStudent',
+  incomingStudent: "incomingStudent",
+  regularStudent: "regularStudent",
+  outgoingStudent: "outgoingStudent",
 } as const;
 
 export type StudentType = (typeof STUDENT_TYPE)[keyof typeof STUDENT_TYPE];
@@ -53,16 +54,16 @@ export class Student extends User<StudentProps> {
   }
 
   static create(
-    props: Optional<StudentProps, 'createdAt'>,
-    id?: UniqueEntityId,
+    props: Optional<StudentProps, "createdAt">,
+    id?: UniqueEntityId
   ) {
     const student = new Student(
       {
         ...props,
         createdAt: props.createdAt ?? new Date(),
-        role: 'student',
+        role: "student",
       },
-      id,
+      id
     );
 
     return student;
