@@ -2,62 +2,62 @@ import { UniqueEntityId } from "@/core/entities/unique-entity-id";
 import { InMemoryTeacherCoursesRepository } from "test/repositories/in-memory-teacher-courses-repository";
 import { AuthorizationService } from "@/infra/authorization/authorization.service";
 import { makeAdmin } from "test/factories/make-admin";
-import { DeleteCourseRegistrationLockDataUseCase } from "./delete-course-registration-lock-data";
 import { ResourceNotFoundError } from "@/core/errors/errors/resource-not-found-error";
 import { makeStudent } from "test/factories/make-student";
 import { NotAllowedError } from "@/core/errors/errors/not-allowed-error";
 import { makeTeacherCourse } from "test/factories/make-teacher-course";
-import { InMemoryCourseRegistrationLockDataRepository } from "test/repositories/in-memory-course-registration-lock-data-repository";
-import { makeCourseRegistrationLockData } from "test/factories/make-course-registration-lock-data";
 import { makeSessionUser } from "test/factories/make-session-user";
+import { DeleteCourseActiveStudentsDataUseCase } from "./delete-course-active-students-data";
+import { InMemoryCourseActiveStudentsDataRepository } from "test/repositories/in-memory-course-active-students-data-repository";
+import { makeCourseActiveStudentsData } from "test/factories/make-course-active-students-data";
 
-let inMemoryCourseRegistrationLockDataRepository: InMemoryCourseRegistrationLockDataRepository;
+let inMemoryCourseActiveStudentsDataRepository: InMemoryCourseActiveStudentsDataRepository;
 let inMemoryTeacherCoursesRepository: InMemoryTeacherCoursesRepository;
 let authorizationService: AuthorizationService;
-let sut: DeleteCourseRegistrationLockDataUseCase;
+let sut: DeleteCourseActiveStudentsDataUseCase;
 
-describe("Delete Course Registration Lock Data", () => {
+describe("Delete Course Active Students Data", () => {
   beforeEach(() => {
-    inMemoryCourseRegistrationLockDataRepository =
-      new InMemoryCourseRegistrationLockDataRepository();
+    inMemoryCourseActiveStudentsDataRepository =
+      new InMemoryCourseActiveStudentsDataRepository();
     inMemoryTeacherCoursesRepository = new InMemoryTeacherCoursesRepository();
     authorizationService = new AuthorizationService(
       inMemoryTeacherCoursesRepository
     );
 
-    sut = new DeleteCourseRegistrationLockDataUseCase(
-      inMemoryCourseRegistrationLockDataRepository,
+    sut = new DeleteCourseActiveStudentsDataUseCase(
+      inMemoryCourseActiveStudentsDataRepository,
       authorizationService
     );
   });
 
-  it("should be able to delete course registration lock data", async () => {
+  it("should be able to delete course active students data", async () => {
     const adminUser = makeAdmin();
-    const newCourseRegistrationLockData = makeCourseRegistrationLockData(
+    const newCourseActiveStudentsData = makeCourseActiveStudentsData(
       {},
-      new UniqueEntityId("courseRegistrationLockData-1")
+      new UniqueEntityId("courseActiveStudentsData-1")
     );
 
-    inMemoryCourseRegistrationLockDataRepository.create(
-      newCourseRegistrationLockData
+    inMemoryCourseActiveStudentsDataRepository.create(
+      newCourseActiveStudentsData
     );
 
     const result = await sut.execute({
-      courseRegistrationLockDataId: "courseRegistrationLockData-1",
+      courseActiveStudentsDataId: "courseActiveStudentsData-1",
       sessionUser: makeSessionUser(adminUser),
     });
 
     expect(result.isRight()).toBe(true);
     expect(
-      inMemoryCourseRegistrationLockDataRepository.courseRegistrationLockData
+      inMemoryCourseActiveStudentsDataRepository.courseActiveStudentsData
     ).toHaveLength(0);
   });
 
-  it("should not be able to delete course registration lock data if not exists", async () => {
+  it("should not be able to delete course active students data if not exists", async () => {
     const adminUser = makeAdmin();
 
     const result = await sut.execute({
-      courseRegistrationLockDataId: "courseRegistrationLockData-1",
+      courseActiveStudentsDataId: "courseActiveStudentsData-1",
       sessionUser: makeSessionUser(adminUser),
     });
 
@@ -65,19 +65,19 @@ describe("Delete Course Registration Lock Data", () => {
     expect(result.value).instanceOf(ResourceNotFoundError);
   });
 
-  it("should not be able to delete course registration lock data if session user is student", async () => {
+  it("should not be able to delete course active students data if session user is student", async () => {
     const studentUser = makeStudent();
-    const newCourseRegistrationLockData = makeCourseRegistrationLockData(
+    const newCourseActiveStudentsData = makeCourseActiveStudentsData(
       {},
-      new UniqueEntityId("courseRegistrationLockData-1")
+      new UniqueEntityId("courseActiveStudentsData-1")
     );
 
-    inMemoryCourseRegistrationLockDataRepository.create(
-      newCourseRegistrationLockData
+    inMemoryCourseActiveStudentsDataRepository.create(
+      newCourseActiveStudentsData
     );
 
     const result = await sut.execute({
-      courseRegistrationLockDataId: "courseRegistrationLockData-1",
+      courseActiveStudentsDataId: "courseActiveStudentsData-1",
       sessionUser: makeSessionUser(studentUser),
     });
 
@@ -85,22 +85,22 @@ describe("Delete Course Registration Lock Data", () => {
     expect(result.value).instanceOf(NotAllowedError);
   });
 
-  it("should not be able to delete course registration lock data if session user is teacher with invalid role", async () => {
+  it("should not be able to delete course active students data if session user is teacher with invalid role", async () => {
     const teacherCourse = makeTeacherCourse({
       teacherRole: "extensionsActivitiesManagerTeacher",
     });
-    const newCourseRegistrationLockData = makeCourseRegistrationLockData(
+    const newCourseActiveStudentsData = makeCourseActiveStudentsData(
       {},
-      new UniqueEntityId("courseRegistrationLockData-1")
+      new UniqueEntityId("courseActiveStudentsData-1")
     );
 
     inMemoryTeacherCoursesRepository.create(teacherCourse);
-    inMemoryCourseRegistrationLockDataRepository.create(
-      newCourseRegistrationLockData
+    inMemoryCourseActiveStudentsDataRepository.create(
+      newCourseActiveStudentsData
     );
 
     const result = await sut.execute({
-      courseRegistrationLockDataId: "courseRegistrationLockData-1",
+      courseActiveStudentsDataId: "courseActiveStudentsData-1",
       sessionUser: makeSessionUser(teacherCourse.teacher),
     });
 

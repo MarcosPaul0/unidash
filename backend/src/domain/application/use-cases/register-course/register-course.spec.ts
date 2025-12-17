@@ -1,11 +1,12 @@
-import { AuthorizationService } from '@/infra/authorization/authorization.service';
-import { RegisterCourseUseCase } from './register-course';
-import { InMemoryCoursesRepository } from 'test/repositories/in-memory-courses-repository';
-import { InMemoryTeacherCoursesRepository } from 'test/repositories/in-memory-teacher-courses-repository';
-import { makeUser } from 'test/factories/make-user';
-import { makeCourse } from 'test/factories/make-course';
-import { CourseAlreadyExistsError } from '../errors/course-already-exists-error';
-import { NotAllowedError } from '@/core/errors/errors/not-allowed-error';
+import { AuthorizationService } from "@/infra/authorization/authorization.service";
+import { RegisterCourseUseCase } from "./register-course";
+import { InMemoryCoursesRepository } from "test/repositories/in-memory-courses-repository";
+import { InMemoryTeacherCoursesRepository } from "test/repositories/in-memory-teacher-courses-repository";
+import { makeUser } from "test/factories/make-user";
+import { makeCourse } from "test/factories/make-course";
+import { CourseAlreadyExistsError } from "../errors/course-already-exists-error";
+import { NotAllowedError } from "@/core/errors/errors/not-allowed-error";
+import { makeSessionUser } from "test/factories/make-session-user";
 
 let inMemoryCoursesRepository: InMemoryCoursesRepository;
 let inMemoryTeacherCoursesRepository: InMemoryTeacherCoursesRepository;
@@ -13,31 +14,31 @@ let authorizationService: AuthorizationService;
 
 let sut: RegisterCourseUseCase;
 
-describe('Register Course', () => {
+describe("Register Course", () => {
   beforeEach(() => {
     inMemoryCoursesRepository = new InMemoryCoursesRepository();
     inMemoryTeacherCoursesRepository = new InMemoryTeacherCoursesRepository();
     authorizationService = new AuthorizationService(
-      inMemoryTeacherCoursesRepository,
+      inMemoryTeacherCoursesRepository
     );
 
     sut = new RegisterCourseUseCase(
       inMemoryCoursesRepository,
-      authorizationService,
+      authorizationService
     );
   });
 
-  it('should be able to register a new course', async () => {
+  it("should be able to register a new course", async () => {
     const adminUser = makeUser({
-      name: 'John Doe',
-      email: 'johnDoe@fake.com',
+      name: "John Doe",
+      email: "johnDoe@fake.com",
     });
 
     const result = await sut.execute({
       course: {
-        name: 'Fake course',
+        name: "Fake course",
       },
-      sessionUser: adminUser,
+      sessionUser: makeSessionUser(adminUser),
     });
 
     expect(result.isRight()).toBe(true);
@@ -46,59 +47,59 @@ describe('Register Course', () => {
     });
   });
 
-  it('should not be able to register a new course if already exists', async () => {
+  it("should not be able to register a new course if already exists", async () => {
     const adminUser = makeUser({
-      name: 'John Doe',
-      email: 'johnDoe@fake.com',
+      name: "John Doe",
+      email: "johnDoe@fake.com",
     });
 
     const course = makeCourse({
-      name: 'Fake course',
+      name: "Fake course",
     });
 
     inMemoryCoursesRepository.courses.push(course);
 
     const result = await sut.execute({
       course: {
-        name: 'Fake course',
+        name: "Fake course",
       },
-      sessionUser: adminUser,
+      sessionUser: makeSessionUser(adminUser),
     });
 
     expect(result.isLeft()).toBe(true);
     expect(result.value).instanceOf(CourseAlreadyExistsError);
   });
 
-  it('should not be able to register a new course if user session is teacher', async () => {
+  it("should not be able to register a new course if user session is teacher", async () => {
     const teacherUser = makeUser({
-      name: 'John Doe',
-      email: 'johnDoe@fake.com',
-      role: 'teacher',
+      name: "John Doe",
+      email: "johnDoe@fake.com",
+      role: "teacher",
     });
 
     const result = await sut.execute({
       course: {
-        name: 'Fake course',
+        name: "Fake course",
       },
-      sessionUser: teacherUser,
+      sessionUser: makeSessionUser(teacherUser),
     });
 
     expect(result.isLeft()).toBe(true);
     expect(result.value).instanceOf(NotAllowedError);
   });
 
-  it('should not be able to register a new course if user session is student', async () => {
+  it("should not be able to register a new course if user session is student", async () => {
     const studentUser = makeUser({
-      name: 'John Doe',
-      email: 'johnDoe@fake.com',
-      role: 'student',
+      name: "John Doe",
+      email: "johnDoe@fake.com",
+      role: "student",
     });
 
     const result = await sut.execute({
       course: {
-        name: 'Fake course',
+        name: "Fake course",
       },
-      sessionUser: studentUser,
+      sessionUser: makeSessionUser(studentUser),
     });
 
     expect(result.isLeft()).toBe(true);

@@ -1,18 +1,19 @@
-import { RegisterStudentUseCase } from './register-student';
-import { InMemoryStudentsRepository } from 'test/repositories/in-memory-students-repository';
-import { FakeHasher } from 'test/cryptography/fake-hasher';
-import { UserAlreadyExistsError } from '../errors/user-already-exists-error';
-import { InMemoryAccountActivationTokensRepository } from 'test/repositories/in-memory-account-activation-tokens-repository';
-import { FakeNotificationSender } from 'test/notification-sender/fake-notification-sender';
-import { MockInstance } from 'vitest';
-import { InMemoryUsersRepository } from 'test/repositories/in-memory-users-repository';
-import { SendAccountActivationNotificationParams } from '../../notification-sender/notification-sender';
-import { USER_ACTION_TOKEN_TYPE } from '@/domain/entities/user-action-token';
-import { AuthorizationService } from '@/infra/authorization/authorization.service';
-import { InMemoryTeacherCoursesRepository } from 'test/repositories/in-memory-teacher-courses-repository';
-import { makeTeacherCourse } from 'test/factories/make-teacher-course';
-import { makeUser } from 'test/factories/make-user';
-import { NotAllowedError } from '@/core/errors/errors/not-allowed-error';
+import { RegisterStudentUseCase } from "./register-student";
+import { InMemoryStudentsRepository } from "test/repositories/in-memory-students-repository";
+import { FakeHasher } from "test/cryptography/fake-hasher";
+import { UserAlreadyExistsError } from "../errors/user-already-exists-error";
+import { InMemoryAccountActivationTokensRepository } from "test/repositories/in-memory-account-activation-tokens-repository";
+import { FakeNotificationSender } from "test/notification-sender/fake-notification-sender";
+import { MockInstance } from "vitest";
+import { InMemoryUsersRepository } from "test/repositories/in-memory-users-repository";
+import { SendAccountActivationNotificationParams } from "../../notification-sender/notification-sender";
+import { USER_ACTION_TOKEN_TYPE } from "@/domain/entities/user-action-token";
+import { AuthorizationService } from "@/infra/authorization/authorization.service";
+import { InMemoryTeacherCoursesRepository } from "test/repositories/in-memory-teacher-courses-repository";
+import { makeTeacherCourse } from "test/factories/make-teacher-course";
+import { makeUser } from "test/factories/make-user";
+import { NotAllowedError } from "@/core/errors/errors/not-allowed-error";
+import { makeSessionUser } from "test/factories/make-session-user";
 
 let inMemoryUsersRepository: InMemoryUsersRepository;
 let inMemoryTeacherCoursesRepository: InMemoryTeacherCoursesRepository;
@@ -27,7 +28,7 @@ let sendAccountActivationNotificationSpy: MockInstance<
 
 let sut: RegisterStudentUseCase;
 
-describe('Register Student', () => {
+describe("Register Student", () => {
   beforeEach(() => {
     inMemoryUsersRepository = new InMemoryUsersRepository();
     inMemoryStudentsRepository = new InMemoryStudentsRepository();
@@ -37,12 +38,12 @@ describe('Register Student', () => {
     fakeHasher = new FakeHasher();
     notificationSender = new FakeNotificationSender();
     authorizationService = new AuthorizationService(
-      inMemoryTeacherCoursesRepository,
+      inMemoryTeacherCoursesRepository
     );
 
     sendAccountActivationNotificationSpy = vi.spyOn(
       notificationSender,
-      'sendAccountActivationNotification',
+      "sendAccountActivationNotification"
     );
 
     sut = new RegisterStudentUseCase(
@@ -51,36 +52,36 @@ describe('Register Student', () => {
       inMemoryAccountActivationTokensRepository,
       fakeHasher,
       notificationSender,
-      authorizationService,
+      authorizationService
     );
   });
 
-  it('should be able to register a new student', async () => {
+  it("should be able to register a new student", async () => {
     const teacherCourse = makeTeacherCourse({
-      teacherRole: 'courseManagerTeacher',
+      teacherRole: "courseManagerTeacher",
     });
 
     const teacherUser = makeUser(
       {
         name: teacherCourse.teacher.name,
         email: teacherCourse.teacher.email,
-        role: 'teacher',
+        role: "teacher",
       },
-      teacherCourse.teacher.id,
+      teacherCourse.teacher.id
     );
 
     inMemoryTeacherCoursesRepository.teacherCourses.push(teacherCourse);
 
     const result = await sut.execute({
       student: {
-        name: 'John Doe',
-        email: 'johndoe@example.com',
-        password: '123456',
-        matriculation: '1231231234',
+        name: "John Doe",
+        email: "johndoe@example.com",
+        password: "123456",
+        matriculation: "1231231234",
         courseId: teacherCourse.course.id.toString(),
-        type: 'incomingStudent',
+        type: "incomingStudent",
       },
-      sessionUser: teacherUser,
+      sessionUser: makeSessionUser(teacherUser),
     });
 
     expect(result.isRight()).toBe(true);
@@ -89,119 +90,119 @@ describe('Register Student', () => {
     });
   });
 
-  it('should hash student password upon registration', async () => {
+  it("should hash student password upon registration", async () => {
     const teacherCourse = makeTeacherCourse({
-      teacherRole: 'courseManagerTeacher',
+      teacherRole: "courseManagerTeacher",
     });
 
     const teacherUser = makeUser(
       {
         name: teacherCourse.teacher.name,
         email: teacherCourse.teacher.email,
-        role: 'teacher',
+        role: "teacher",
       },
-      teacherCourse.teacher.id,
+      teacherCourse.teacher.id
     );
 
     inMemoryTeacherCoursesRepository.teacherCourses.push(teacherCourse);
 
     const result = await sut.execute({
       student: {
-        name: 'John Doe',
-        email: 'johndoe@example.com',
-        password: '123456',
-        matriculation: '1231231234',
+        name: "John Doe",
+        email: "johndoe@example.com",
+        password: "123456",
+        matriculation: "1231231234",
         courseId: teacherCourse.course.id.toString(),
-        type: 'incomingStudent',
+        type: "incomingStudent",
       },
-      sessionUser: teacherUser,
+      sessionUser: makeSessionUser(teacherUser),
     });
 
-    const hashedPassword = await fakeHasher.hash('123456');
+    const hashedPassword = await fakeHasher.hash("123456");
 
     expect(result.isRight()).toBe(true);
     expect(inMemoryStudentsRepository.items[0].password).toEqual(
-      hashedPassword,
+      hashedPassword
     );
   });
 
-  it('should not be able to register a new student if the user already exists', async () => {
+  it("should not be able to register a new student if the user already exists", async () => {
     const teacherCourse = makeTeacherCourse({
-      teacherRole: 'courseManagerTeacher',
+      teacherRole: "courseManagerTeacher",
     });
 
     const teacherUser = makeUser(
       {
         name: teacherCourse.teacher.name,
         email: teacherCourse.teacher.email,
-        role: 'teacher',
+        role: "teacher",
       },
-      teacherCourse.teacher.id,
+      teacherCourse.teacher.id
     );
 
     inMemoryTeacherCoursesRepository.teacherCourses.push(teacherCourse);
 
     const studentUser = makeUser(
       {
-        name: 'John Doe',
-        email: 'johndoe@example.com',
-        role: 'student',
+        name: "John Doe",
+        email: "johndoe@example.com",
+        role: "student",
       },
-      teacherCourse.teacher.id,
+      teacherCourse.teacher.id
     );
 
     inMemoryUsersRepository.items.push(studentUser);
 
     const result = await sut.execute({
       student: {
-        name: 'John Doe',
-        email: 'johndoe@example.com',
-        password: '123456',
-        matriculation: '1231231234',
+        name: "John Doe",
+        email: "johndoe@example.com",
+        password: "123456",
+        matriculation: "1231231234",
         courseId: teacherCourse.course.id.toString(),
-        type: 'incomingStudent',
+        type: "incomingStudent",
       },
-      sessionUser: teacherUser,
+      sessionUser: makeSessionUser(teacherUser),
     });
 
     expect(result.isLeft()).toBe(true);
     expect(result.value).instanceOf(UserAlreadyExistsError);
   });
 
-  it('should send an email when an student register', async () => {
+  it("should send an email when an student register", async () => {
     const teacherCourse = makeTeacherCourse({
-      teacherRole: 'courseManagerTeacher',
+      teacherRole: "courseManagerTeacher",
     });
 
     const teacherUser = makeUser(
       {
         name: teacherCourse.teacher.name,
         email: teacherCourse.teacher.email,
-        role: 'teacher',
+        role: "teacher",
       },
-      teacherCourse.teacher.id,
+      teacherCourse.teacher.id
     );
 
     inMemoryTeacherCoursesRepository.teacherCourses.push(teacherCourse);
 
     await sut.execute({
       student: {
-        name: 'John Doe',
-        email: 'johndoe@example.com',
-        password: '123456',
-        matriculation: '1231231234',
+        name: "John Doe",
+        email: "johndoe@example.com",
+        password: "123456",
+        matriculation: "1231231234",
         courseId: teacherCourse.course.id.toString(),
-        type: 'incomingStudent',
+        type: "incomingStudent",
       },
-      sessionUser: teacherUser,
+      sessionUser: makeSessionUser(teacherUser),
     });
 
     expect(sendAccountActivationNotificationSpy).toHaveBeenCalledOnce();
     expect(sendAccountActivationNotificationSpy).toHaveBeenCalledWith({
       activationToken: expect.any(String),
       user: expect.objectContaining({
-        name: 'John Doe',
-        email: 'johndoe@example.com',
+        name: "John Doe",
+        email: "johndoe@example.com",
       }),
     });
 
@@ -210,68 +211,68 @@ describe('Register Student', () => {
         expiresAt: expect.any(Date),
         token: expect.any(String),
         actionType: USER_ACTION_TOKEN_TYPE.accountConfirmation,
-      }),
+      })
     );
   });
 
-  it('should not be able to register a new student if session user is not teacher', async () => {
+  it("should not be able to register a new student if session user is not teacher", async () => {
     const teacherCourse = makeTeacherCourse({
-      teacherRole: 'courseManagerTeacher',
+      teacherRole: "courseManagerTeacher",
     });
 
     const studentUser = makeUser(
       {
         name: teacherCourse.teacher.name,
         email: teacherCourse.teacher.email,
-        role: 'student',
+        role: "student",
       },
-      teacherCourse.teacher.id,
+      teacherCourse.teacher.id
     );
 
     inMemoryTeacherCoursesRepository.teacherCourses.push(teacherCourse);
 
     const result = await sut.execute({
       student: {
-        name: 'John Doe',
-        email: 'johndoe@example.com',
-        password: '123456',
-        matriculation: '1231231234',
+        name: "John Doe",
+        email: "johndoe@example.com",
+        password: "123456",
+        matriculation: "1231231234",
         courseId: teacherCourse.course.id.toString(),
-        type: 'incomingStudent',
+        type: "incomingStudent",
       },
-      sessionUser: studentUser,
+      sessionUser: makeSessionUser(studentUser),
     });
 
     expect(result.isLeft()).toBe(true);
     expect(result.value).instanceOf(NotAllowedError);
   });
 
-  it('should not be able to register a new student if session teacher not belongs to course', async () => {
+  it("should not be able to register a new student if session teacher not belongs to course", async () => {
     const teacherCourse = makeTeacherCourse({
-      teacherRole: 'courseManagerTeacher',
+      teacherRole: "courseManagerTeacher",
     });
 
     const teacherUser = makeUser(
       {
         name: teacherCourse.teacher.name,
         email: teacherCourse.teacher.email,
-        role: 'teacher',
+        role: "teacher",
       },
-      teacherCourse.teacher.id,
+      teacherCourse.teacher.id
     );
 
     inMemoryTeacherCoursesRepository.teacherCourses.push(teacherCourse);
 
     const result = await sut.execute({
       student: {
-        name: 'John Doe',
-        email: 'johndoe@example.com',
-        password: '123456',
-        matriculation: '1231231234',
-        courseId: 'fake-course-id',
-        type: 'incomingStudent',
+        name: "John Doe",
+        email: "johndoe@example.com",
+        password: "123456",
+        matriculation: "1231231234",
+        courseId: "fake-course-id",
+        type: "incomingStudent",
       },
-      sessionUser: teacherUser,
+      sessionUser: makeSessionUser(teacherUser),
     });
 
     expect(result.isLeft()).toBe(true);

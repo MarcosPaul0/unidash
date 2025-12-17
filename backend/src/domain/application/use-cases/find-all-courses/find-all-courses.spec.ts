@@ -1,22 +1,29 @@
-import { FindAllCoursesUseCase } from './find-all-courses';
-import { InMemoryCoursesRepository } from 'test/repositories/in-memory-courses-repository';
-import { makeCourse } from 'test/factories/make-course';
-import { makeAdmin } from 'test/factories/make-admin';
-import { makeSessionUser } from 'test/factories/make-session-user';
-import { makeTeacher } from 'test/factories/make-teacher';
-import { makeTeacherCourse } from 'test/factories/make-teacher-course';
+import { FindAllCoursesUseCase } from "./find-all-courses";
+import { InMemoryCoursesRepository } from "test/repositories/in-memory-courses-repository";
+import { makeCourse } from "test/factories/make-course";
+import { makeAdmin } from "test/factories/make-admin";
+import { makeSessionUser } from "test/factories/make-session-user";
+import { makeTeacher } from "test/factories/make-teacher";
+import { makeTeacherCourse } from "test/factories/make-teacher-course";
+import { InMemoryStudentsRepository } from "test/repositories/in-memory-students-repository";
 
 let inMemoryCoursesRepository: InMemoryCoursesRepository;
+let inMemoryStudentsRepository: InMemoryStudentsRepository;
 
 let sut: FindAllCoursesUseCase;
 
-describe('Find All Courses', () => {
+describe("Find All Courses", () => {
   beforeEach(() => {
     inMemoryCoursesRepository = new InMemoryCoursesRepository();
-    sut = new FindAllCoursesUseCase(inMemoryCoursesRepository);
+    inMemoryStudentsRepository = new InMemoryStudentsRepository();
+
+    sut = new FindAllCoursesUseCase(
+      inMemoryCoursesRepository,
+      inMemoryStudentsRepository
+    );
   });
 
-  it('should be able to find all courses with admin session', async () => {
+  it("should be able to find all courses with admin session", async () => {
     const admin = makeAdmin();
 
     const course1 = makeCourse();
@@ -35,7 +42,7 @@ describe('Find All Courses', () => {
     });
   });
 
-  it('should be able to find all courses with teacher session', async () => {
+  it("should be able to find all courses with teacher session", async () => {
     const teacher = makeTeacher();
 
     const course1 = makeCourse();

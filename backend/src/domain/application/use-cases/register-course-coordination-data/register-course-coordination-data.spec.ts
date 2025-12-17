@@ -1,17 +1,18 @@
-import { UniqueEntityId } from '@/core/entities/unique-entity-id';
-import { InMemoryTeacherCoursesRepository } from 'test/repositories/in-memory-teacher-courses-repository';
-import { AuthorizationService } from '@/infra/authorization/authorization.service';
-import { makeAdmin } from 'test/factories/make-admin';
-import { ResourceNotFoundError } from '@/core/errors/errors/resource-not-found-error';
-import { makeStudent } from 'test/factories/make-student';
-import { NotAllowedError } from '@/core/errors/errors/not-allowed-error';
-import { makeTeacherCourse } from 'test/factories/make-teacher-course';
-import { RegisterCourseCoordinationDataUseCase } from './register-course-coordination-data';
-import { InMemoryCoursesRepository } from 'test/repositories/in-memory-courses-repository';
-import { makeCourse } from 'test/factories/make-course';
-import { InMemoryCourseCoordinationDataRepository } from 'test/repositories/in-memory-course-coordination-data-repository';
-import { makeCourseCoordinationData } from 'test/factories/make-course-coordination-data';
-import { CourseCoordinationDataAlreadyExistsError } from '../errors/course-coordination-data-already-exists-error';
+import { UniqueEntityId } from "@/core/entities/unique-entity-id";
+import { InMemoryTeacherCoursesRepository } from "test/repositories/in-memory-teacher-courses-repository";
+import { AuthorizationService } from "@/infra/authorization/authorization.service";
+import { makeAdmin } from "test/factories/make-admin";
+import { ResourceNotFoundError } from "@/core/errors/errors/resource-not-found-error";
+import { makeStudent } from "test/factories/make-student";
+import { NotAllowedError } from "@/core/errors/errors/not-allowed-error";
+import { makeTeacherCourse } from "test/factories/make-teacher-course";
+import { RegisterCourseCoordinationDataUseCase } from "./register-course-coordination-data";
+import { InMemoryCoursesRepository } from "test/repositories/in-memory-courses-repository";
+import { makeCourse } from "test/factories/make-course";
+import { InMemoryCourseCoordinationDataRepository } from "test/repositories/in-memory-course-coordination-data-repository";
+import { makeCourseCoordinationData } from "test/factories/make-course-coordination-data";
+import { CourseCoordinationDataAlreadyExistsError } from "../errors/course-coordination-data-already-exists-error";
+import { makeSessionUser } from "test/factories/make-session-user";
 
 let inMemoryCoursesRepository: InMemoryCoursesRepository;
 let inMemoryCourseCoordinationDataRepository: InMemoryCourseCoordinationDataRepository;
@@ -19,34 +20,34 @@ let inMemoryTeacherCoursesRepository: InMemoryTeacherCoursesRepository;
 let authorizationService: AuthorizationService;
 let sut: RegisterCourseCoordinationDataUseCase;
 
-describe('Register Course Coordination Data', () => {
+describe("Register Course Coordination Data", () => {
   beforeEach(() => {
     inMemoryCoursesRepository = new InMemoryCoursesRepository();
     inMemoryCourseCoordinationDataRepository =
       new InMemoryCourseCoordinationDataRepository();
     inMemoryTeacherCoursesRepository = new InMemoryTeacherCoursesRepository();
     authorizationService = new AuthorizationService(
-      inMemoryTeacherCoursesRepository,
+      inMemoryTeacherCoursesRepository
     );
 
     sut = new RegisterCourseCoordinationDataUseCase(
       inMemoryCoursesRepository,
       inMemoryCourseCoordinationDataRepository,
-      authorizationService,
+      authorizationService
     );
   });
 
-  it('should be able to register course coordination data', async () => {
+  it("should be able to register course coordination data", async () => {
     const adminUser = makeAdmin();
-    const course = makeCourse({}, new UniqueEntityId('course-1'));
+    const course = makeCourse({}, new UniqueEntityId("course-1"));
 
     inMemoryCoursesRepository.create(course);
 
     const result = await sut.execute({
       courseCoordinationData: {
-        courseId: 'course-1',
+        courseId: "course-1",
         year: 2025,
-        semester: 'first',
+        semester: "first",
         servicesRequestsBySystem: 10,
         servicesRequestsByEmail: 10,
         resolutionActions: 10,
@@ -54,8 +55,11 @@ describe('Register Course Coordination Data', () => {
         meetingsByBoardOfDirectors: 10,
         meetingsByUndergraduateChamber: 10,
         meetingsByCourseCouncil: 10,
+        meetingsByNde: 10,
+        academicActionPlans: "fake academic action plan",
+        administrativeActionPlans: "fake administrative action plan",
       },
-      sessionUser: adminUser,
+      sessionUser: makeSessionUser(adminUser),
     });
 
     expect(result.isRight()).toBe(true);
@@ -65,14 +69,14 @@ describe('Register Course Coordination Data', () => {
     });
   });
 
-  it('should not be able to register course coordination data if course not exists', async () => {
+  it("should not be able to register course coordination data if course not exists", async () => {
     const adminUser = makeAdmin();
 
     const result = await sut.execute({
       courseCoordinationData: {
-        courseId: 'course-1',
+        courseId: "course-1",
         year: 2025,
-        semester: 'first',
+        semester: "first",
         servicesRequestsBySystem: 10,
         servicesRequestsByEmail: 10,
         resolutionActions: 10,
@@ -80,20 +84,23 @@ describe('Register Course Coordination Data', () => {
         meetingsByBoardOfDirectors: 10,
         meetingsByUndergraduateChamber: 10,
         meetingsByCourseCouncil: 10,
+        meetingsByNde: 10,
+        academicActionPlans: "fake academic action plan",
+        administrativeActionPlans: "fake administrative action plan",
       },
-      sessionUser: adminUser,
+      sessionUser: makeSessionUser(adminUser),
     });
 
     expect(result.isLeft()).toBe(true);
     expect(result.value).instanceOf(ResourceNotFoundError);
   });
 
-  it('should not be able to register course coordination data if already exists', async () => {
+  it("should not be able to register course coordination data if already exists", async () => {
     const adminUser = makeAdmin();
-    const course = makeCourse({}, new UniqueEntityId('course-1'));
+    const course = makeCourse({}, new UniqueEntityId("course-1"));
     const newCourseCoordinationData = makeCourseCoordinationData(
-      { semester: 'first', year: 2025, courseId: 'course-1' },
-      new UniqueEntityId('courseCoordinationData-1'),
+      { semester: "first", year: 2025, courseId: "course-1" },
+      new UniqueEntityId("courseCoordinationData-1")
     );
 
     inMemoryCoursesRepository.create(course);
@@ -101,9 +108,9 @@ describe('Register Course Coordination Data', () => {
 
     const result = await sut.execute({
       courseCoordinationData: {
-        courseId: 'course-1',
+        courseId: "course-1",
         year: 2025,
-        semester: 'first',
+        semester: "first",
         servicesRequestsBySystem: 10,
         servicesRequestsByEmail: 10,
         resolutionActions: 10,
@@ -111,25 +118,28 @@ describe('Register Course Coordination Data', () => {
         meetingsByBoardOfDirectors: 10,
         meetingsByUndergraduateChamber: 10,
         meetingsByCourseCouncil: 10,
+        meetingsByNde: 10,
+        academicActionPlans: "fake academic action plan",
+        administrativeActionPlans: "fake administrative action plan",
       },
-      sessionUser: adminUser,
+      sessionUser: makeSessionUser(adminUser),
     });
 
     expect(result.isLeft()).toBe(true);
     expect(result.value).instanceOf(CourseCoordinationDataAlreadyExistsError);
   });
 
-  it('should not be able to register course coordination data if session user is student', async () => {
+  it("should not be able to register course coordination data if session user is student", async () => {
     const studentUser = makeStudent();
-    const course = makeCourse({}, new UniqueEntityId('course-1'));
+    const course = makeCourse({}, new UniqueEntityId("course-1"));
 
     inMemoryCoursesRepository.create(course);
 
     const result = await sut.execute({
       courseCoordinationData: {
-        courseId: 'course-1',
+        courseId: "course-1",
         year: 2025,
-        semester: 'first',
+        semester: "first",
         servicesRequestsBySystem: 10,
         servicesRequestsByEmail: 10,
         resolutionActions: 10,
@@ -137,28 +147,31 @@ describe('Register Course Coordination Data', () => {
         meetingsByBoardOfDirectors: 10,
         meetingsByUndergraduateChamber: 10,
         meetingsByCourseCouncil: 10,
+        meetingsByNde: 10,
+        academicActionPlans: "fake academic action plan",
+        administrativeActionPlans: "fake administrative action plan",
       },
-      sessionUser: studentUser,
+      sessionUser: makeSessionUser(studentUser),
     });
 
     expect(result.isLeft()).toBe(true);
     expect(result.value).instanceOf(NotAllowedError);
   });
 
-  it('should not be able to register course coordination data if session user is teacher with invalid role', async () => {
+  it("should not be able to register course coordination data if session user is teacher with invalid role", async () => {
     const teacherCourse = makeTeacherCourse({
-      teacherRole: 'extensionsActivitiesManagerTeacher',
+      teacherRole: "extensionsActivitiesManagerTeacher",
     });
-    const course = makeCourse({}, new UniqueEntityId('course-1'));
+    const course = makeCourse({}, new UniqueEntityId("course-1"));
 
     inMemoryTeacherCoursesRepository.create(teacherCourse);
     inMemoryCoursesRepository.create(course);
 
     const result = await sut.execute({
       courseCoordinationData: {
-        courseId: 'course-1',
+        courseId: "course-1",
         year: 2025,
-        semester: 'first',
+        semester: "first",
         servicesRequestsBySystem: 10,
         servicesRequestsByEmail: 10,
         resolutionActions: 10,
@@ -166,8 +179,11 @@ describe('Register Course Coordination Data', () => {
         meetingsByBoardOfDirectors: 10,
         meetingsByUndergraduateChamber: 10,
         meetingsByCourseCouncil: 10,
+        meetingsByNde: 10,
+        academicActionPlans: "fake academic action plan",
+        administrativeActionPlans: "fake administrative action plan",
       },
-      sessionUser: teacherCourse.teacher,
+      sessionUser: makeSessionUser(teacherCourse.teacher),
     });
 
     expect(result.isLeft()).toBe(true);
