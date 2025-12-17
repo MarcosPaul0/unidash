@@ -6,15 +6,20 @@ import { CompletionWorkSkeletons } from "../../_charts/courseCompletionWork/Comp
 import { CompletionWorkIndicators } from "../../_charts/courseCompletionWork/CompletionWorkIndicators";
 import { CourseNotSelectedCard } from "../../_components/CourseNotSelectedCard";
 import { EmptyIndicatorsCard } from "../../_components/EmptyIndicatorsCard";
+import { CoursesNotExistsCard } from "../../_components/CoursesNotExistsCard";
 
 export function ConclusionContent() {
-  const { indicators, isFetching, courseIsSelected, hasIndicator } =
+  const { indicators, isFetching, courseIsSelected, hasIndicator, hasCourses } =
     useFetchIndicators({
       fetchIndicators: IndicatorsCSService.getCompletionWorkIndicators,
     });
 
   if (isFetching) {
     return <CompletionWorkSkeletons />;
+  }
+
+  if (!hasCourses) {
+    return <CoursesNotExistsCard />;
   }
 
   if (!courseIsSelected) {

@@ -6,15 +6,20 @@ import { TeacherProductionsSkeletons } from "../../_charts/teachersProductions/T
 import { TeacherProductionsIndicators } from "../../_charts/teachersProductions/TeacherProductionsIndicators";
 import { CourseNotSelectedCard } from "../../_components/CourseNotSelectedCard";
 import { EmptyIndicatorsCard } from "../../_components/EmptyIndicatorsCard";
+import { CoursesNotExistsCard } from "../../_components/CoursesNotExistsCard";
 
 export function ProductionsContent() {
-  const { indicators, isFetching, courseIsSelected, hasIndicator } =
+  const { indicators, isFetching, courseIsSelected, hasIndicator, hasCourses } =
     useFetchIndicators({
       fetchIndicators: IndicatorsCSService.getTeacherProductionsIndicators,
     });
 
   if (isFetching) {
     return <TeacherProductionsSkeletons />;
+  }
+
+  if (!hasCourses) {
+    return <CoursesNotExistsCard />;
   }
 
   if (!courseIsSelected) {

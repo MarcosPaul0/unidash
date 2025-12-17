@@ -6,15 +6,20 @@ import { CoordinationSkeletons } from "../../_charts/coordination/CoordinationSk
 import { CoordinationIndicators } from "../../_charts/coordination/CoordinationIndicators";
 import { CourseNotSelectedCard } from "../../_components/CourseNotSelectedCard";
 import { EmptyIndicatorsCard } from "../../_components/EmptyIndicatorsCard";
+import { CoursesNotExistsCard } from "../../_components/CoursesNotExistsCard";
 
 export function CoordinationContent() {
-  const { indicators, isFetching, courseIsSelected, hasIndicator } =
+  const { indicators, isFetching, courseIsSelected, hasIndicator, hasCourses } =
     useFetchIndicators({
       fetchIndicators: IndicatorsCSService.getCoordinationIndicators,
     });
 
   if (isFetching) {
     return <CoordinationSkeletons />;
+  }
+
+  if (!hasCourses) {
+    return <CoursesNotExistsCard />;
   }
 
   if (!courseIsSelected) {

@@ -6,15 +6,20 @@ import { StudentIncomingSkeletons } from "../../_charts/ingress/StudentIncomingS
 import { StudentIncomingIndicators } from "../../_charts/ingress/StudentIncomingIndicators";
 import { CourseNotSelectedCard } from "../../_components/CourseNotSelectedCard";
 import { EmptyIndicatorsCard } from "../../_components/EmptyIndicatorsCard";
+import { CoursesNotExistsCard } from "../../_components/CoursesNotExistsCard";
 
 export function IngressContent() {
-  const { indicators, isFetching, courseIsSelected, hasIndicator } =
+  const { indicators, isFetching, courseIsSelected, hasIndicator, hasCourses } =
     useFetchIndicators({
       fetchIndicators: IndicatorsCSService.getStudentIncomingIndicators,
     });
 
   if (isFetching) {
     return <StudentIncomingSkeletons />;
+  }
+
+  if (!hasCourses) {
+    return <CoursesNotExistsCard />;
   }
 
   if (!courseIsSelected) {
