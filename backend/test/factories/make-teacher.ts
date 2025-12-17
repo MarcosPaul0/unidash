@@ -1,13 +1,14 @@
-import { faker } from '@faker-js/faker';
-import { UniqueEntityId } from '@/core/entities/unique-entity-id';
-import { Injectable } from '@nestjs/common';
-import { PrismaService } from '@/infra/database/prisma/prisma.service';
-import { Teacher, TeacherProps } from '@/domain/entities/teacher';
-import { PrismaTeacherMapper } from '@/infra/database/prisma/mappers/prisma-teacher-mapper';
+import { faker } from "@faker-js/faker";
+import { UniqueEntityId } from "@/core/entities/unique-entity-id";
+import { Injectable } from "@nestjs/common";
+import { PrismaService } from "@/infra/database/prisma/prisma.service";
+import { Teacher, TeacherProps } from "@/domain/entities/teacher";
+import { PrismaTeacherMapper } from "@/infra/database/prisma/mappers/prisma-teacher-mapper";
+import { makeSessionUser } from "./make-session-user";
 
 export function makeTeacher(
-  override: Partial<Omit<TeacherProps, 'role'>> = {},
-  id?: UniqueEntityId,
+  override: Partial<Omit<TeacherProps, "role">> = {},
+  id?: UniqueEntityId
 ) {
   const teacher = Teacher.create(
     {
@@ -15,10 +16,10 @@ export function makeTeacher(
       email: faker.internet.email(),
       password: faker.internet.password(),
       isActive: true,
-      role: 'teacher',
+      role: "teacher",
       ...override,
     },
-    id,
+    id
   );
 
   return teacher;

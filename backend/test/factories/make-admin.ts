@@ -1,23 +1,24 @@
-import { faker } from '@faker-js/faker';
-import { UniqueEntityId } from '@/core/entities/unique-entity-id';
-import { Injectable } from '@nestjs/common';
-import { PrismaService } from '@/infra/database/prisma/prisma.service';
-import { Admin, AdminProps } from '@/domain/entities/admin';
-import { PrismaAdminMapper } from '@/infra/database/prisma/mappers/prisma-admin-mapper';
+import { faker } from "@faker-js/faker";
+import { UniqueEntityId } from "@/core/entities/unique-entity-id";
+import { Injectable } from "@nestjs/common";
+import { PrismaService } from "@/infra/database/prisma/prisma.service";
+import { Admin, AdminProps } from "@/domain/entities/admin";
+import { PrismaAdminMapper } from "@/infra/database/prisma/mappers/prisma-admin-mapper";
+import { makeSessionUser } from "./make-session-user";
 
 export function makeAdmin(
-  override: Partial<Omit<AdminProps, 'role'>> = {},
-  id?: UniqueEntityId,
+  override: Partial<Omit<AdminProps, "role">> = {},
+  id?: UniqueEntityId
 ) {
   const admin = Admin.create(
     {
       name: faker.person.fullName(),
       email: faker.internet.email(),
       password: faker.internet.password(),
-      role: 'admin',
+      role: "admin",
       ...override,
     },
-    id,
+    id
   );
 
   return admin;
