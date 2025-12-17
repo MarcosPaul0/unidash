@@ -1,9 +1,9 @@
-import { Pagination } from '@/core/pagination/pagination';
+import { Pagination } from "@/core/pagination/pagination";
 import {
   StudentsRepository,
   FindAllStudents,
-} from '@/domain/application/repositories/students-repository';
-import { Student } from '@/domain/entities/student';
+} from "@/domain/application/repositories/students-repository";
+import { Student } from "@/domain/entities/student";
 
 export class InMemoryStudentsRepository implements StudentsRepository {
   public items: Student[] = [];
@@ -18,9 +18,19 @@ export class InMemoryStudentsRepository implements StudentsRepository {
     return student;
   }
 
+  async findByStudentId(studentId: string): Promise<Student | null> {
+    const student = this.items.find((item) => item.id.toString() === studentId);
+
+    if (!student) {
+      return null;
+    }
+
+    return student;
+  }
+
   async findByMatriculation(matriculation: string): Promise<Student | null> {
     const student = this.items.find(
-      (item) => item.matriculation === matriculation,
+      (item) => item.matriculation === matriculation
     );
 
     if (!student) {
