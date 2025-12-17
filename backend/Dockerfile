@@ -1,4 +1,4 @@
-FROM node:21.5.0 as builder
+FROM node:24.12.0 as builder
 
 ENV NODE_ENV build
 
