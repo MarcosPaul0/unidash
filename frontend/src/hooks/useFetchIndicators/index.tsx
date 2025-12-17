@@ -14,6 +14,7 @@ export function useFetchIndicators<T>({
     setIsFetching(true);
 
     if (courses.length === 0) {
+      setIsFetching(false);
       return;
     }
 
@@ -45,5 +46,6 @@ export function useFetchIndicators<T>({
     isFetching,
     courseIsSelected: Boolean(activeCourse),
     hasIndicator: Boolean(indicators),
+    hasCourses: courses && courses.length > 0,
   };
 }
