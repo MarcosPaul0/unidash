@@ -1,14 +1,14 @@
-import { Injectable } from '@nestjs/common';
-import { Student as PrismaStudent } from '@prisma/client';
-import { PrismaService } from '../prisma.service';
-import { PrismaStudentMapper } from '../mappers/prisma-student-mapper';
+import { Injectable } from "@nestjs/common";
+import { Student as PrismaStudent } from "@prisma/client";
+import { PrismaService } from "../prisma.service";
+import { PrismaStudentMapper } from "../mappers/prisma-student-mapper";
 import {
   StudentsRepository,
   FindAllStudents,
   FindAllStudentsFilters,
-} from '@/domain/application/repositories/students-repository';
-import { Pagination } from '@/core/pagination/pagination';
-import { Student } from '@/domain/entities/student';
+} from "@/domain/application/repositories/students-repository";
+import { Pagination } from "@/core/pagination/pagination";
+import { Student } from "@/domain/entities/student";
 
 @Injectable()
 export class PrismaStudentsRepository implements StudentsRepository {
@@ -18,7 +18,7 @@ export class PrismaStudentsRepository implements StudentsRepository {
     const user = await this.prisma.user.findUnique({
       where: {
         id,
-        role: 'student',
+        role: "student",
       },
       include: {
         student: true,
@@ -61,7 +61,7 @@ export class PrismaStudentsRepository implements StudentsRepository {
         student: {
           matriculation,
         },
-        role: 'student',
+        role: "student",
       },
       include: {
         student: true,
@@ -80,7 +80,7 @@ export class PrismaStudentsRepository implements StudentsRepository {
 
   async findAll(
     pagination?: Pagination,
-    filters?: FindAllStudentsFilters,
+    filters?: FindAllStudentsFilters
   ): Promise<FindAllStudents> {
     const paginationParams = pagination
       ? {
@@ -91,23 +91,24 @@ export class PrismaStudentsRepository implements StudentsRepository {
 
     const students = await this.prisma.user.findMany({
       where: {
-        role: 'student',
+        role: "student",
         student: {
           courseId: filters?.courseId,
+          type: filters?.type,
         },
       },
       include: {
         student: true,
       },
       orderBy: {
-        createdAt: 'desc',
+        createdAt: "desc",
       },
       ...paginationParams,
     });
 
     const totalStudents = await this.prisma.user.count({
       where: {
-        role: 'student',
+        role: "student",
         student: {
           courseId: filters?.courseId,
         },
@@ -127,7 +128,7 @@ export class PrismaStudentsRepository implements StudentsRepository {
         PrismaStudentMapper.toDomain({
           ...user,
           student: user.student as PrismaStudent,
-        }),
+        })
       ),
       totalItems: totalStudents,
       totalPages: pagination
@@ -149,6 +150,17 @@ export class PrismaStudentsRepository implements StudentsRepository {
     ]);
   }
 
+  async saveMany(students: Student[]): Promise<void> {
+    await Promise.all(
+      students.map((student) =>
+        this.prisma.user.update({
+          where: { id: student.id.toString() },
+          data: PrismaStudentMapper.toPrismaUpdate(student),
+        })
+      )
+    );
+  }
+
   async create(student: Student): Promise<void> {
     const data = PrismaStudentMapper.toPrismaCreate(student);
 
@@ -156,6 +168,16 @@ export class PrismaStudentsRepository implements StudentsRepository {
       this.prisma.user.create({
         data,
       }),
+    ]);
+  }
+
+  async createMany(students: Student[]): Promise<void> {
+    await Promise.all([
+      students.map((student) =>
+        this.prisma.user.create({
+          data: PrismaStudentMapper.toPrismaCreate(student),
+        })
+      ),
     ]);
   }
 
