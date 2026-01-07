@@ -1,16 +1,17 @@
-import { Injectable, Logger } from '@nestjs/common';
-import { EnvService } from '../../../env/env.service';
+import { Injectable, Logger } from "@nestjs/common";
+import { EnvService } from "../../../env/env.service";
 
-import { readFileSync } from 'fs';
-import { join } from 'path';
+import { readFileSync } from "fs";
+import { join } from "path";
 
-import Handlebars from 'handlebars';
-import { EmailSender } from '../email-sender';
-import { MailerService } from '@nestjs-modules/mailer';
+import Handlebars from "handlebars";
+import { EmailSender } from "../email-sender";
+import { MailerService } from "@nestjs-modules/mailer";
 import {
   SendAccountActivationNotificationParams,
+  SendIncomingStudentRegistrationNotificationParams,
   SendPasswordResetNotificationParams,
-} from '@/domain/application/notification-sender/notification-sender';
+} from "@/domain/application/notification-sender/notification-sender";
 
 interface SendMailParams {
   to: string;
@@ -23,22 +24,22 @@ interface SendMailParams {
 export class MailerEmailSender implements EmailSender {
   constructor(
     private mailerService: MailerService,
-    private envService: EnvService,
+    private envService: EnvService
   ) {}
 
   async sendAccountActivationEmail({
     user,
     activationToken,
   }: SendAccountActivationNotificationParams): Promise<void> {
-    const url = `${this.envService.get('ACCOUNT_ACTIVATION_URL')}/${activationToken}`;
+    const url = `${this.envService.get("ACCOUNT_ACTIVATION_URL")}/${activationToken}`;
 
     this.sendMail({
       to: user.email,
-      subject: 'Ativação de conta',
-      template: './confirmation',
+      subject: "Ativação de conta",
+      template: "./confirmation",
       context: {
         name: user.name,
-        role: user.role === 'student' ? 'Discente' : 'Docente',
+        role: user.role === "student" ? "Discente" : "Docente",
         url,
       },
     });
@@ -48,14 +49,35 @@ export class MailerEmailSender implements EmailSender {
     passwordResetToken,
     user,
   }: SendPasswordResetNotificationParams): Promise<void> {
-    const url = `${this.envService.get('PASSWORD_RESET_URL')}/${passwordResetToken}`;
+    const url = `${this.envService.get("PASSWORD_RESET_URL")}/${passwordResetToken}`;
 
     this.sendMail({
       to: user.email,
-      subject: 'Redefinição de senha',
-      template: './forgot-password',
+      subject: "Redefinição de senha",
+      template: "./forgot-password",
       context: {
         name: user.name,
+        url,
+      },
+    });
+  }
+
+  async sendIncomingStudentRegistrationEmail({
+    name,
+    email,
+    password,
+    incomingStudentToken,
+  }: SendIncomingStudentRegistrationNotificationParams): Promise<void> {
+    const url = `${this.envService.get("INCOMING_STUDENT_URL")}/${incomingStudentToken}`;
+
+    this.sendMail({
+      to: email,
+      subject: "Bem-vindo(a) ao Undash",
+      template: "./incoming-student-registration",
+      context: {
+        name,
+        password,
+        email,
         url,
       },
     });
@@ -64,19 +86,19 @@ export class MailerEmailSender implements EmailSender {
   private async sendMail({ to, subject, template, context }: SendMailParams) {
     const templatePath = join(
       __dirname,
-      '..',
-      '..',
-      '..',
-      '..',
-      '..',
-      '..',
-      'common',
-      'mail',
-      'templates',
-      `${template}.hbs`,
+      "..",
+      "..",
+      "..",
+      "..",
+      "..",
+      "..",
+      "common",
+      "mail",
+      "templates",
+      `${template}.hbs`
     );
 
-    const templateString = readFileSync(templatePath, 'utf8');
+    const templateString = readFileSync(templatePath, "utf8");
 
     const templateCompiled = Handlebars.compile(templateString);
     const outputString = templateCompiled(context);
@@ -84,13 +106,13 @@ export class MailerEmailSender implements EmailSender {
     try {
       await this.mailerService.sendMail({
         from: {
-          address: this.envService.get('SMTP_FROM'),
-          name: 'Unidash',
+          address: this.envService.get("SMTP_FROM"),
+          name: "Unidash",
         },
         to: [
           {
             address: to,
-            name: 'Unidash',
+            name: "Unidash",
           },
         ],
         subject,
