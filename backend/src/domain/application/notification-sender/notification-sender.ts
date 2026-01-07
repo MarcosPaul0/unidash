@@ -1,4 +1,4 @@
-import { User } from '../../entities/user';
+import { User } from "../../entities/user";
 
 export type SendAccountActivationNotificationParams = {
   user: User;
@@ -10,12 +10,23 @@ export type SendPasswordResetNotificationParams = {
   passwordResetToken: string;
 };
 
+export type SendIncomingStudentRegistrationNotificationParams = {
+  name: string;
+  password: string;
+  email: string;
+  incomingStudentToken: string;
+};
+
 export abstract class NotificationSender {
   abstract sendAccountActivationNotification(
-    params: SendAccountActivationNotificationParams,
+    params: SendAccountActivationNotificationParams
   ): Promise<void>;
 
   abstract sendPasswordResetNotification(
-    params: SendPasswordResetNotificationParams,
+    params: SendPasswordResetNotificationParams
+  ): Promise<void>;
+
+  abstract sendIncomingStudentRegistrationNotification(
+    params: SendIncomingStudentRegistrationNotificationParams
   ): Promise<void>;
 }
