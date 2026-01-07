@@ -37,4 +37,26 @@ export class JwtEncrypter implements TokenEncrypter {
       return null;
     }
   }
+
+  // TODO criar entidade para token de ingressante
+  generateIncomingStudentToken(
+    payload: Record<string, unknown>
+  ): Promise<string> {
+    const expiresIn =
+      `${this.envService.get("JWT_INCOMING_STUDENT_EXPIRATION_DAYS")}d` as unknown as number;
+
+    return this.jwtService.signAsync(payload, {
+      expiresIn,
+    });
+  }
+
+  async verifyIncomingStudentToken(token: string) {
+    try {
+      const { sub } = await this.jwtService.verifyAsync(token);
+
+      return { sub };
+    } catch {
+      return null;
+    }
+  }
 }
