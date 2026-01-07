@@ -1,5 +1,5 @@
-import { Pagination } from '@/core/pagination/pagination';
-import { Student } from '../../entities/student';
+import { Pagination } from "@/core/pagination/pagination";
+import { Student, StudentType } from "../../entities/student";
 
 export type FindAllStudents = {
   students: Student[];
@@ -9,6 +9,7 @@ export type FindAllStudents = {
 
 export type FindAllStudentsFilters = {
   courseId?: string;
+  type?: StudentType;
 };
 
 export abstract class StudentsRepository {
@@ -17,9 +18,11 @@ export abstract class StudentsRepository {
   abstract findByMatriculation(matriculation: string): Promise<Student | null>;
   abstract findAll(
     pagination?: Pagination,
-    filters?: FindAllStudentsFilters,
+    filters?: FindAllStudentsFilters
   ): Promise<FindAllStudents>;
   abstract create(student: Student): Promise<void>;
+  abstract createMany(students: Student[]): Promise<void>;
   abstract save(student: Student): Promise<void>;
+  abstract saveMany(student: Student[]): Promise<void>;
   abstract delete(student: Student): Promise<void>;
 }
