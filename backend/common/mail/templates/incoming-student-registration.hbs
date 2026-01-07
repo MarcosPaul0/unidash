@@ -6,7 +6,7 @@
       href="https://fonts.googleapis.com/css?family=Inter"
       rel="stylesheet"
     />
-    <title>Unidash - Recuperação de conta</title>
+    <title>Unidash - Registro de Ingressante</title>
     <style>
       body {
         font-family: "Inter", sans-serif;
@@ -49,6 +49,12 @@
         margin-bottom: 12px;
       }
 
+      .body h2 {
+        font-size: 20px;
+        margin-bottom: 12px;
+        font-weight: bold;
+      }
+
       .body p {
         font-size: 15px;
         line-height: 1.6;
@@ -84,6 +90,12 @@
         color: #1b2a41;
         text-decoration: none;
         font-weight: 500;
+      }
+
+      .separator {
+        width: 100%;
+        border-top: 1px solid #d3d3d3;
+        padding-bottom: 30px;
       }
     </style>
   </head>
@@ -130,19 +142,90 @@
                 <h1>Olá, {{name}} 👋</h1>
               </td>
             </tr>
+
             <tr>
               <td align="center">
                 <p>
-                  Recebemos a solicitação de recuperação da sua conta.<br />
-                  Para redefinir sua senha, por favor, clique no link abaixo:
+                  Você foi cadastrado com sucesso no Unidash pelo(a)
+                  coordenador(a) do seu curso.
                 </p>
               </td>
             </tr>
+
+            <tr>
+              <td align="center">
+                <p>
+                  O UniDash é a plataforma acadêmica utilizada para centralizar
+                  informações do curso, acompanhar dados acadêmicos, responder
+                  formulários institucionais e apoiar o acompanhamento da sua
+                  trajetória acadêmica.
+                </p>
+              </td>
+            </tr>
+
+            <tr><td class="separator"></td></tr>
+
+            <tr>
+              <td align="center">
+                <h2>
+                  🔐 Acesso ao sistema
+                </h2>
+              </td>
+            </tr>
+
+            <tr>
+              <td align="center">
+                <p>
+                  A partir de agora, você já pode acessar o sistema utilizando
+                  as credenciais abaixo:
+                </p>
+              </td>
+            </tr>
+
+            <tr>
+              <td align="left">
+                <ul>
+                  <li><strong>Login: </strong>{{email}}</li>
+                  <li><strong>Senha: </strong>{{password}}</li>
+                </ul>
+              </td>
+            </tr>
+
+            <tr>
+              <td align="center">
+                <p>
+                  <strong>Importante: </strong>
+                  Recomendamos que você altere sua senha no primeiro acesso para
+                  garantir maior segurança da sua conta.
+                </p>
+              </td>
+            </tr>
+
+            <tr><td class="separator"></td></tr>
+
+            <tr>
+              <td align="center">
+                <h2>
+                  📄 Formulário de Ingressantes
+                </h2>
+              </td>
+            </tr>
+
+            <tr>
+              <td align="center">
+                <p>
+                  Para concluir seu processo de ingresso no curso, solicitamos o
+                  preenchimento do formulário de ingressantes, que contém
+                  informações essenciais para a organização acadêmica.
+                </p>
+              </td>
+            </tr>
+
             <tr class="bodyContent">
               <td class="bodyContent" align="center">
 
                 <a class="button" href="{{url}}" target="_blank">
-                  <p class="change-password-text">Alterar senha</p>
+                  <p class="change-password-text">Acessar formulário de ingresso</p>
                 </a>
               </td>
             </tr>
@@ -150,10 +233,9 @@
             <tr>
               <td align="center">
                 <p style="font-size: 12px; color:#888; margin-top:20px;">
-                  Caso você não tenha solicitado a recuperação da senha, por
-                  favor, desconsidere este e-mail. Sua conta permanece segura.
-                  Se suspeitar de alguma atividade não autorizada, entre em
-                  contato com nosso suporte imediatamente.
+                  Caso tenha qualquer dúvida ou dificuldade de acesso, entre em
+                  contato com a coordenação do curso ou com o suporte do
+                  sistema.
                 </p>
               </td>
             </tr>
