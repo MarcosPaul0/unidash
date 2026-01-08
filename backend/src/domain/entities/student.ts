@@ -34,7 +34,7 @@ export class Student extends User<StudentProps> {
   }
 
   set type(type: StudentType) {
-    if (type) {
+    if (!type) {
       return;
     }
 
@@ -46,7 +46,7 @@ export class Student extends User<StudentProps> {
   }
 
   set courseId(courseId: string) {
-    if (courseId) {
+    if (!courseId) {
       return;
     }
 
