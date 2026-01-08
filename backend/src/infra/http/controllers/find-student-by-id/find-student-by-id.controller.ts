@@ -6,15 +6,15 @@ import {
   HttpCode,
   NotFoundException,
   Param,
-} from '@nestjs/common';
-import { FindStudentByIdUseCase } from '@/domain/application/use-cases/find-student-by-id/find-student-by-id';
-import { ResourceNotFoundError } from '@/core/errors/errors/resource-not-found-error';
-import { CurrentUser } from '../../../auth/current-user-decorator';
-import { NotAllowedError } from '@/core/errors/errors/not-allowed-error';
-import { StudentPresenter } from '../../presenters/student-presenter';
-import { SessionUser } from '@/domain/entities/user';
+} from "@nestjs/common";
+import { FindStudentByIdUseCase } from "@/domain/application/use-cases/find-student-by-id/find-student-by-id";
+import { ResourceNotFoundError } from "@/core/errors/errors/resource-not-found-error";
+import { CurrentUser } from "../../../auth/current-user-decorator";
+import { NotAllowedError } from "@/core/errors/errors/not-allowed-error";
+import { StudentPresenter } from "../../presenters/student-presenter";
+import { SessionUser } from "@/domain/entities/user";
 
-@Controller('/students/by-id:studentId')
+@Controller("/students/by-id/:studentId")
 export class FindStudentByIdController {
   constructor(private findStudentByIdUseCase: FindStudentByIdUseCase) {}
 
@@ -22,7 +22,7 @@ export class FindStudentByIdController {
   @HttpCode(200)
   async handle(
     @CurrentUser() sessionUser: SessionUser,
-    @Param('studentId') studentId: string,
+    @Param("studentId") studentId: string
   ) {
     const result = await this.findStudentByIdUseCase.execute({
       studentId,
