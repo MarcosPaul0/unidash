@@ -6,6 +6,7 @@ export const envSchema = z.object({
   JWT_PUBLIC_KEY: z.string(),
   PORT: z.coerce.number().optional().default(3333),
   JWT_ACCESS_TOKEN_EXPIRATION_SECONDS: z.coerce.number(),
+  JWT_INCOMING_STUDENT_EXPIRATION_DAYS: z.coerce.number(),
   JWT_REFRESH_TOKEN_EXPIRATION_DAYS: z.coerce.number(),
   SMTP_HOST: z.string(),
   SMTP_USER: z.string(),
@@ -15,6 +16,7 @@ export const envSchema = z.object({
   FRONTEND_BASE_URL: z.url(),
   ACCOUNT_ACTIVATION_URL: z.string(),
   PASSWORD_RESET_URL: z.string(),
+  INCOMING_STUDENT_URL: z.string(),
   REFRESH_TOKEN_COOKIE: z.string(),
 });
 
