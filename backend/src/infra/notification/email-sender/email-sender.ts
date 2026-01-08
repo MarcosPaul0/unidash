@@ -1,14 +1,19 @@
 import {
   SendAccountActivationNotificationParams,
+  SendIncomingStudentRegistrationNotificationParams,
   SendPasswordResetNotificationParams,
-} from '@/domain/application/notification-sender/notification-sender';
+} from "@/domain/application/notification-sender/notification-sender";
 
 export abstract class EmailSender {
   abstract sendAccountActivationEmail(
-    params: SendAccountActivationNotificationParams,
+    params: SendAccountActivationNotificationParams
   ): Promise<void>;
 
   abstract sendPasswordResetEmail(
-    params: SendPasswordResetNotificationParams,
+    params: SendPasswordResetNotificationParams
+  ): Promise<void>;
+
+  abstract sendIncomingStudentRegistrationEmail(
+    params: SendIncomingStudentRegistrationNotificationParams
   ): Promise<void>;
 }
