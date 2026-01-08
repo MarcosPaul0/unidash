@@ -1,6 +1,6 @@
-import { z } from 'zod';
-import { ZodValidationPipe } from '@/infra/http/pipes/zod-validation-pipe';
-import { SendPasswordResetEmailUseCase } from '@/domain/application/use-cases/send-password-reset-email/send-password-reset-email';
+import { z } from "zod";
+import { ZodValidationPipe } from "@/infra/http/pipes/zod-validation-pipe";
+import { SendPasswordResetEmailUseCase } from "@/domain/application/use-cases/send-password-reset-email/send-password-reset-email";
 import {
   Body,
   Controller,
@@ -8,16 +8,16 @@ import {
   NotFoundException,
   Post,
   UsePipes,
-} from '@nestjs/common';
-import { Public } from '@/infra/auth/public';
+} from "@nestjs/common";
+import { Public } from "@/infra/auth/public";
 
 const forgotPasswordBodySchema = z.object({
-  email: z.string().email(),
+  email: z.email(),
 });
 
 type ForgotPasswordBodySchema = z.infer<typeof forgotPasswordBodySchema>;
 
-@Controller('/forgot-password')
+@Controller("/forgot-password")
 @Public()
 export class ForgotPasswordController {
   constructor(private sendPasswordResetEmail: SendPasswordResetEmailUseCase) {}
