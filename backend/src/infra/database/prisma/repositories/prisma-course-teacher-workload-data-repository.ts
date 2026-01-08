@@ -1,20 +1,18 @@
-import { Injectable } from '@nestjs/common';
-import { PrismaService } from '../prisma.service';
-import { Semester } from '@/domain/entities/course-data';
-import { Pagination } from '@/core/pagination/pagination';
-import { FindForIndicatorsFilter } from '@/domain/application/repositories/course-coordination-data-repository';
+import { Injectable } from "@nestjs/common";
+import { PrismaService } from "../prisma.service";
+import { Semester } from "@/domain/entities/course-data";
+import { Pagination } from "@/core/pagination/pagination";
+import { FindForIndicatorsFilter } from "@/domain/application/repositories/course-coordination-data-repository";
 import {
   FindAllCourseTeacherWorkloadData,
   FindAllCourseTeacherWorkloadDataFilter,
   CourseTeacherWorkloadDataRepository,
-} from '@/domain/application/repositories/course-teacher-workload-data-repository';
-import { CourseTeacherWorkloadData } from '@/domain/entities/course-teacher-workload-data';
-import { PrismaCourseTeacherWorkloadDataMapper } from '../mappers/prisma-course-teacher-workload-data-mapper';
+} from "@/domain/application/repositories/course-teacher-workload-data-repository";
+import { CourseTeacherWorkloadData } from "@/domain/entities/course-teacher-workload-data";
+import { PrismaCourseTeacherWorkloadDataMapper } from "../mappers/prisma-course-teacher-workload-data-mapper";
 
 @Injectable()
-export class PrismaCourseTeacherWorkloadDataRepository
-  implements CourseTeacherWorkloadDataRepository
-{
+export class PrismaCourseTeacherWorkloadDataRepository implements CourseTeacherWorkloadDataRepository {
   constructor(private prisma: PrismaService) {}
 
   async findById(id: string): Promise<CourseTeacherWorkloadData | null> {
@@ -37,7 +35,7 @@ export class PrismaCourseTeacherWorkloadDataRepository
     }
 
     return PrismaCourseTeacherWorkloadDataMapper.withTeacherToDomain(
-      courseTeacherWorkloadData,
+      courseTeacherWorkloadData
     );
   }
 
@@ -45,7 +43,7 @@ export class PrismaCourseTeacherWorkloadDataRepository
     courseId: string,
     teacherId: string,
     year: number,
-    semester: Semester,
+    semester: Semester
   ): Promise<CourseTeacherWorkloadData | null> {
     const teacher = await this.prisma.teacher.findUnique({
       where: {
@@ -72,14 +70,14 @@ export class PrismaCourseTeacherWorkloadDataRepository
     }
 
     return PrismaCourseTeacherWorkloadDataMapper.toDomain(
-      courseTeacherWorkloadData,
+      courseTeacherWorkloadData
     );
   }
 
   async findAllForCourse(
     courseId: string,
     pagination?: Pagination,
-    filters?: FindAllCourseTeacherWorkloadDataFilter,
+    filters?: FindAllCourseTeacherWorkloadDataFilter
   ): Promise<FindAllCourseTeacherWorkloadData> {
     const paginationParams = pagination
       ? {
@@ -95,9 +93,11 @@ export class PrismaCourseTeacherWorkloadDataRepository
           semester: filters?.semester,
           year: filters?.year,
         },
-        orderBy: {
-          year: 'desc',
-        },
+        orderBy: [
+          { year: "desc" },
+          { semester: "desc" },
+          { teacher: { user: { name: "asc" } } },
+        ],
         include: {
           teacher: {
             include: {
@@ -133,7 +133,7 @@ export class PrismaCourseTeacherWorkloadDataRepository
 
     return {
       courseTeacherWorkloadData: courseTeacherWorkloadData.map((data) =>
-        PrismaCourseTeacherWorkloadDataMapper.withTeacherToDomain(data),
+        PrismaCourseTeacherWorkloadDataMapper.withTeacherToDomain(data)
       ),
       totalItems: totalTeacherWorkloadData,
       totalPages: pagination
@@ -145,7 +145,7 @@ export class PrismaCourseTeacherWorkloadDataRepository
   async findAllForTeacher(
     teacherId: string,
     pagination?: Pagination,
-    filters?: FindAllCourseTeacherWorkloadDataFilter,
+    filters?: FindAllCourseTeacherWorkloadDataFilter
   ): Promise<FindAllCourseTeacherWorkloadData> {
     const paginationParams = pagination
       ? {
@@ -163,9 +163,7 @@ export class PrismaCourseTeacherWorkloadDataRepository
           semester: filters?.semester,
           year: filters?.year,
         },
-        orderBy: {
-          year: 'desc',
-        },
+        orderBy: [{ year: "desc" }, { semester: "desc" }],
         ...paginationParams,
       });
 
@@ -190,7 +188,7 @@ export class PrismaCourseTeacherWorkloadDataRepository
 
     return {
       courseTeacherWorkloadData: courseTeacherWorkloadData.map((data) =>
-        PrismaCourseTeacherWorkloadDataMapper.toDomain(data),
+        PrismaCourseTeacherWorkloadDataMapper.toDomain(data)
       ),
       totalItems: totalCourseTeacherWorkloadData,
       totalPages: pagination
@@ -201,7 +199,7 @@ export class PrismaCourseTeacherWorkloadDataRepository
 
   async findForIndicators(
     courseId: string,
-    filters?: FindForIndicatorsFilter,
+    filters?: FindForIndicatorsFilter
   ): Promise<CourseTeacherWorkloadData[]> {
     const courseTeacherWorkloadData =
       await this.prisma.courseTeacherWorkloadData.findMany({
@@ -225,25 +223,22 @@ export class PrismaCourseTeacherWorkloadDataRepository
           },
         },
         orderBy: [
-          {
-            year: 'desc',
-          },
-          {
-            teacher: { user: { name: 'asc' } },
-          },
+          { year: "desc" },
+          { semester: "desc" },
+          { teacher: { user: { name: "asc" } } },
         ],
       });
 
     return courseTeacherWorkloadData.map((data) =>
-      PrismaCourseTeacherWorkloadDataMapper.withTeacherToDomain(data),
+      PrismaCourseTeacherWorkloadDataMapper.withTeacherToDomain(data)
     );
   }
 
   async create(
-    courseTeacherWorkloadData: CourseTeacherWorkloadData,
+    courseTeacherWorkloadData: CourseTeacherWorkloadData
   ): Promise<void> {
     const data = PrismaCourseTeacherWorkloadDataMapper.toPrismaCreate(
-      courseTeacherWorkloadData,
+      courseTeacherWorkloadData
     );
 
     const teacher = await this.prisma.teacher.findUnique({
@@ -254,7 +249,7 @@ export class PrismaCourseTeacherWorkloadDataRepository
 
     if (!teacher) {
       // TODO atualizar para Logger
-      console.log('Teacher not exists');
+      console.log("Teacher not exists");
       return;
     }
 
@@ -267,10 +262,10 @@ export class PrismaCourseTeacherWorkloadDataRepository
   }
 
   async save(
-    courseTeacherWorkloadData: CourseTeacherWorkloadData,
+    courseTeacherWorkloadData: CourseTeacherWorkloadData
   ): Promise<void> {
     const data = PrismaCourseTeacherWorkloadDataMapper.toPrismaUpdate(
-      courseTeacherWorkloadData,
+      courseTeacherWorkloadData
     );
 
     await this.prisma.courseTeacherWorkloadData.update({
@@ -282,7 +277,7 @@ export class PrismaCourseTeacherWorkloadDataRepository
   }
 
   async delete(
-    courseTeacherWorkloadData: CourseTeacherWorkloadData,
+    courseTeacherWorkloadData: CourseTeacherWorkloadData
   ): Promise<void> {
     await this.prisma.courseTeacherWorkloadData.delete({
       where: {

@@ -1,20 +1,18 @@
-import { Injectable } from '@nestjs/common';
-import { PrismaService } from '../prisma.service';
-import { Semester } from '@/domain/entities/course-data';
-import { Pagination } from '@/core/pagination/pagination';
-import { FindForIndicatorsFilter } from '@/domain/application/repositories/course-coordination-data-repository';
-import { CourseExtensionActivitiesData } from '@/domain/entities/course-extension-activities-data';
+import { Injectable } from "@nestjs/common";
+import { PrismaService } from "../prisma.service";
+import { Semester } from "@/domain/entities/course-data";
+import { Pagination } from "@/core/pagination/pagination";
+import { FindForIndicatorsFilter } from "@/domain/application/repositories/course-coordination-data-repository";
+import { CourseExtensionActivitiesData } from "@/domain/entities/course-extension-activities-data";
 import {
   CourseExtensionActivitiesDataRepository,
   FindAllCourseExtensionActivitiesData,
   FindAllCourseExtensionActivitiesDataFilter,
-} from '@/domain/application/repositories/course-extension-activities-data-repository';
-import { PrismaCourseExtensionActivitiesDataMapper } from '../mappers/prisma-course-extension-activities-data-mapper';
+} from "@/domain/application/repositories/course-extension-activities-data-repository";
+import { PrismaCourseExtensionActivitiesDataMapper } from "../mappers/prisma-course-extension-activities-data-mapper";
 
 @Injectable()
-export class PrismaCourseExtensionActivitiesDataRepository
-  implements CourseExtensionActivitiesDataRepository
-{
+export class PrismaCourseExtensionActivitiesDataRepository implements CourseExtensionActivitiesDataRepository {
   constructor(private prisma: PrismaService) {}
 
   async findById(id: string): Promise<CourseExtensionActivitiesData | null> {
@@ -30,14 +28,14 @@ export class PrismaCourseExtensionActivitiesDataRepository
     }
 
     return PrismaCourseExtensionActivitiesDataMapper.toDomain(
-      courseDeparturesData,
+      courseDeparturesData
     );
   }
 
   async findByCourseAndPeriod(
     courseId: string,
     year: number,
-    semester: Semester,
+    semester: Semester
   ): Promise<CourseExtensionActivitiesData | null> {
     const courseDeparturesData =
       await this.prisma.courseExtensionActivitiesData.findFirst({
@@ -53,14 +51,14 @@ export class PrismaCourseExtensionActivitiesDataRepository
     }
 
     return PrismaCourseExtensionActivitiesDataMapper.toDomain(
-      courseDeparturesData,
+      courseDeparturesData
     );
   }
 
   async findAll(
     courseId: string,
     pagination?: Pagination,
-    filters?: FindAllCourseExtensionActivitiesDataFilter,
+    filters?: FindAllCourseExtensionActivitiesDataFilter
   ): Promise<FindAllCourseExtensionActivitiesData> {
     const paginationParams = pagination
       ? {
@@ -76,9 +74,7 @@ export class PrismaCourseExtensionActivitiesDataRepository
           semester: filters?.semester,
           year: filters?.year,
         },
-        orderBy: {
-          year: 'desc',
-        },
+        orderBy: [{ year: "desc" }, { semester: "desc" }],
         ...paginationParams,
       });
 
@@ -101,12 +97,12 @@ export class PrismaCourseExtensionActivitiesDataRepository
 
     return {
       courseExtensionActivitiesData: courseDeparturesData.map((departureData) =>
-        PrismaCourseExtensionActivitiesDataMapper.toDomain(departureData),
+        PrismaCourseExtensionActivitiesDataMapper.toDomain(departureData)
       ),
       totalItems: totalCourseExtensionActivitiesData,
       totalPages: pagination
         ? Math.ceil(
-            totalCourseExtensionActivitiesData / pagination.itemsPerPage,
+            totalCourseExtensionActivitiesData / pagination.itemsPerPage
           )
         : 1,
     };
@@ -114,7 +110,7 @@ export class PrismaCourseExtensionActivitiesDataRepository
 
   async findForIndicators(
     courseId: string,
-    filters?: FindForIndicatorsFilter,
+    filters?: FindForIndicatorsFilter
   ): Promise<CourseExtensionActivitiesData[]> {
     const CourseExtensionActivitiesData =
       await this.prisma.courseExtensionActivitiesData.findMany({
@@ -130,21 +126,19 @@ export class PrismaCourseExtensionActivitiesDataRepository
                 },
               }),
         },
-        orderBy: {
-          year: 'desc',
-        },
+        orderBy: [{ year: "desc" }, { semester: "desc" }],
       });
 
     return CourseExtensionActivitiesData.map((departureData) =>
-      PrismaCourseExtensionActivitiesDataMapper.toDomain(departureData),
+      PrismaCourseExtensionActivitiesDataMapper.toDomain(departureData)
     );
   }
 
   async create(
-    courseExtensionActivitiesData: CourseExtensionActivitiesData,
+    courseExtensionActivitiesData: CourseExtensionActivitiesData
   ): Promise<void> {
     const data = PrismaCourseExtensionActivitiesDataMapper.toPrismaCreate(
-      courseExtensionActivitiesData,
+      courseExtensionActivitiesData
     );
 
     await this.prisma.courseExtensionActivitiesData.create({
@@ -153,10 +147,10 @@ export class PrismaCourseExtensionActivitiesDataRepository
   }
 
   async save(
-    courseExtensionActivitiesData: CourseExtensionActivitiesData,
+    courseExtensionActivitiesData: CourseExtensionActivitiesData
   ): Promise<void> {
     const data = PrismaCourseExtensionActivitiesDataMapper.toPrismaUpdate(
-      courseExtensionActivitiesData,
+      courseExtensionActivitiesData
     );
 
     await this.prisma.courseExtensionActivitiesData.update({
@@ -168,7 +162,7 @@ export class PrismaCourseExtensionActivitiesDataRepository
   }
 
   async delete(
-    courseExtensionActivitiesData: CourseExtensionActivitiesData,
+    courseExtensionActivitiesData: CourseExtensionActivitiesData
   ): Promise<void> {
     await this.prisma.courseExtensionActivitiesData.delete({
       where: {

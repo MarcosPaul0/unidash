@@ -1,20 +1,18 @@
-import { Injectable } from '@nestjs/common';
-import { PrismaService } from '../prisma.service';
+import { Injectable } from "@nestjs/common";
+import { PrismaService } from "../prisma.service";
 import {
   CourseCoordinationDataRepository,
   FindAllCourseCoordinationData,
   FindAllCourseCoordinationDataFilter,
   FindForIndicatorsFilter,
-} from '@/domain/application/repositories/course-coordination-data-repository';
-import { CourseCoordinationData } from '@/domain/entities/course-coordination-data';
-import { Semester } from '@/domain/entities/course-data';
-import { PrismaCourseCoordinationDataMapper } from '../mappers/prisma-course-coordination-data-mapper';
-import { Pagination } from '@/core/pagination/pagination';
+} from "@/domain/application/repositories/course-coordination-data-repository";
+import { CourseCoordinationData } from "@/domain/entities/course-coordination-data";
+import { Semester } from "@/domain/entities/course-data";
+import { PrismaCourseCoordinationDataMapper } from "../mappers/prisma-course-coordination-data-mapper";
+import { Pagination } from "@/core/pagination/pagination";
 
 @Injectable()
-export class PrismaCourseCoordinationDataRepository
-  implements CourseCoordinationDataRepository
-{
+export class PrismaCourseCoordinationDataRepository implements CourseCoordinationDataRepository {
   constructor(private prisma: PrismaService) {}
 
   async findById(id: string): Promise<CourseCoordinationData | null> {
@@ -35,7 +33,7 @@ export class PrismaCourseCoordinationDataRepository
   async findByCourseAndPeriod(
     courseId: string,
     year: number,
-    semester: Semester,
+    semester: Semester
   ): Promise<CourseCoordinationData | null> {
     const courseDeparturesData =
       await this.prisma.courseCoordinationData.findFirst({
@@ -54,9 +52,9 @@ export class PrismaCourseCoordinationDataRepository
   }
 
   async findAll(
-    courseId,
+    courseId: string,
     pagination?: Pagination,
-    filters?: FindAllCourseCoordinationDataFilter,
+    filters?: FindAllCourseCoordinationDataFilter
   ): Promise<FindAllCourseCoordinationData> {
     const paginationParams = pagination
       ? {
@@ -72,9 +70,7 @@ export class PrismaCourseCoordinationDataRepository
           semester: filters?.semester,
           year: filters?.year,
         },
-        orderBy: {
-          year: 'desc',
-        },
+        orderBy: [{ year: "desc" }, { semester: "desc" }],
         ...paginationParams,
       });
 
@@ -97,7 +93,7 @@ export class PrismaCourseCoordinationDataRepository
 
     return {
       courseCoordinationData: courseCoordinationData.map((departureData) =>
-        PrismaCourseCoordinationDataMapper.toDomain(departureData),
+        PrismaCourseCoordinationDataMapper.toDomain(departureData)
       ),
       totalItems: totalCourseCoordinationData,
       totalPages: pagination
@@ -108,7 +104,7 @@ export class PrismaCourseCoordinationDataRepository
 
   async findForIndicators(
     courseId: string,
-    filters?: FindForIndicatorsFilter,
+    filters?: FindForIndicatorsFilter
   ): Promise<CourseCoordinationData[]> {
     const courseCoordinationData =
       await this.prisma.courseCoordinationData.findMany({
@@ -124,19 +120,17 @@ export class PrismaCourseCoordinationDataRepository
                 },
               }),
         },
-        orderBy: {
-          year: 'desc',
-        },
+        orderBy: [{ year: "desc" }, { semester: "desc" }],
       });
 
     return courseCoordinationData.map((departureData) =>
-      PrismaCourseCoordinationDataMapper.toDomain(departureData),
+      PrismaCourseCoordinationDataMapper.toDomain(departureData)
     );
   }
 
   async create(courseCoordinationData: CourseCoordinationData): Promise<void> {
     const data = PrismaCourseCoordinationDataMapper.toPrismaCreate(
-      courseCoordinationData,
+      courseCoordinationData
     );
 
     await this.prisma.courseCoordinationData.create({
@@ -146,7 +140,7 @@ export class PrismaCourseCoordinationDataRepository
 
   async save(courseCoordinationData: CourseCoordinationData): Promise<void> {
     const data = PrismaCourseCoordinationDataMapper.toPrismaUpdate(
-      courseCoordinationData,
+      courseCoordinationData
     );
 
     await this.prisma.courseCoordinationData.update({

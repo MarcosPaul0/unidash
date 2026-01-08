@@ -1,20 +1,18 @@
-import { Injectable } from '@nestjs/common';
-import { PrismaService } from '../prisma.service';
+import { Injectable } from "@nestjs/common";
+import { PrismaService } from "../prisma.service";
 import {
   CourseDepartureDataRepository,
   FindAllCourseDepartureData,
   FindAllCourseDepartureDataFilter,
-} from '@/domain/application/repositories/course-departure-data-repository';
-import { CourseDepartureData } from '@/domain/entities/course-departure-data';
-import { PrismaCourseDepartureDataMapper } from '../mappers/prisma-course-departure-data-mapper';
-import { Semester } from '@/domain/entities/course-data';
-import { Pagination } from '@/core/pagination/pagination';
-import { FindForIndicatorsFilter } from '@/domain/application/repositories/course-coordination-data-repository';
+} from "@/domain/application/repositories/course-departure-data-repository";
+import { CourseDepartureData } from "@/domain/entities/course-departure-data";
+import { PrismaCourseDepartureDataMapper } from "../mappers/prisma-course-departure-data-mapper";
+import { Semester } from "@/domain/entities/course-data";
+import { Pagination } from "@/core/pagination/pagination";
+import { FindForIndicatorsFilter } from "@/domain/application/repositories/course-coordination-data-repository";
 
 @Injectable()
-export class PrismaCourseDepartureDataRepository
-  implements CourseDepartureDataRepository
-{
+export class PrismaCourseDepartureDataRepository implements CourseDepartureDataRepository {
   constructor(private prisma: PrismaService) {}
 
   async findById(id: string): Promise<CourseDepartureData | null> {
@@ -35,7 +33,7 @@ export class PrismaCourseDepartureDataRepository
   async findByCourseAndPeriod(
     courseId: string,
     year: number,
-    semester: Semester,
+    semester: Semester
   ): Promise<CourseDepartureData | null> {
     const courseDeparturesData =
       await this.prisma.courseDepartureData.findFirst({
@@ -56,7 +54,7 @@ export class PrismaCourseDepartureDataRepository
   async findAll(
     courseId: string,
     pagination?: Pagination,
-    filters?: FindAllCourseDepartureDataFilter,
+    filters?: FindAllCourseDepartureDataFilter
   ): Promise<FindAllCourseDepartureData> {
     const paginationParams = pagination
       ? {
@@ -72,11 +70,9 @@ export class PrismaCourseDepartureDataRepository
           semester: filters?.semester,
           year: filters?.year,
         },
-        orderBy: {
-          year: 'desc',
-        },
+        orderBy: [{ year: "desc" }, { semester: "desc" }],
         ...paginationParams,
-      },
+      }
     );
 
     const totalCourseDepartureData =
@@ -98,7 +94,7 @@ export class PrismaCourseDepartureDataRepository
 
     return {
       courseDepartureData: courseDeparturesData.map((departureData) =>
-        PrismaCourseDepartureDataMapper.toDomain(departureData),
+        PrismaCourseDepartureDataMapper.toDomain(departureData)
       ),
       totalItems: totalCourseDepartureData,
       totalPages: pagination
@@ -109,7 +105,7 @@ export class PrismaCourseDepartureDataRepository
 
   async findForIndicators(
     courseId: string,
-    filters?: FindForIndicatorsFilter,
+    filters?: FindForIndicatorsFilter
   ): Promise<CourseDepartureData[]> {
     const courseDepartureData = await this.prisma.courseDepartureData.findMany({
       where: {
@@ -124,13 +120,11 @@ export class PrismaCourseDepartureDataRepository
               },
             }),
       },
-      orderBy: {
-        year: 'desc',
-      },
+      orderBy: [{ year: "desc" }, { semester: "desc" }],
     });
 
     return courseDepartureData.map((departureData) =>
-      PrismaCourseDepartureDataMapper.toDomain(departureData),
+      PrismaCourseDepartureDataMapper.toDomain(departureData)
     );
   }
 

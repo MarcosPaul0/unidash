@@ -1,20 +1,18 @@
-import { Injectable } from '@nestjs/common';
-import { PrismaService } from '../prisma.service';
-import { Semester } from '@/domain/entities/course-data';
-import { Pagination } from '@/core/pagination/pagination';
-import { FindForIndicatorsFilter } from '@/domain/application/repositories/course-coordination-data-repository';
-import { CourseCompletionWorkData } from '@/domain/entities/course-completion-work-data';
+import { Injectable } from "@nestjs/common";
+import { PrismaService } from "../prisma.service";
+import { Semester } from "@/domain/entities/course-data";
+import { Pagination } from "@/core/pagination/pagination";
+import { FindForIndicatorsFilter } from "@/domain/application/repositories/course-coordination-data-repository";
+import { CourseCompletionWorkData } from "@/domain/entities/course-completion-work-data";
 import {
   CourseCompletionWorkDataRepository,
   FindAllCourseCompletionWorkData,
   FindAllCourseCompletionWorkDataFilter,
-} from '@/domain/application/repositories/course-completion-work-data-repository';
-import { PrismaCourseCompletionWorkDataMapper } from '../mappers/prisma-course-completion-work-data-mapper';
+} from "@/domain/application/repositories/course-completion-work-data-repository";
+import { PrismaCourseCompletionWorkDataMapper } from "../mappers/prisma-course-completion-work-data-mapper";
 
 @Injectable()
-export class PrismaCourseCompletionWorkDataRepository
-  implements CourseCompletionWorkDataRepository
-{
+export class PrismaCourseCompletionWorkDataRepository implements CourseCompletionWorkDataRepository {
   constructor(private prisma: PrismaService) {}
 
   async findById(id: string): Promise<CourseCompletionWorkData | null> {
@@ -35,7 +33,7 @@ export class PrismaCourseCompletionWorkDataRepository
   async findByCourseAndPeriod(
     courseId: string,
     year: number,
-    semester: Semester,
+    semester: Semester
   ): Promise<CourseCompletionWorkData | null> {
     const courseDeparturesData =
       await this.prisma.courseCompletionWorkData.findFirst({
@@ -56,7 +54,7 @@ export class PrismaCourseCompletionWorkDataRepository
   async findAll(
     courseId: string,
     pagination?: Pagination,
-    filters?: FindAllCourseCompletionWorkDataFilter,
+    filters?: FindAllCourseCompletionWorkDataFilter
   ): Promise<FindAllCourseCompletionWorkData> {
     const paginationParams = pagination
       ? {
@@ -72,9 +70,7 @@ export class PrismaCourseCompletionWorkDataRepository
           semester: filters?.semester,
           year: filters?.year,
         },
-        orderBy: {
-          year: 'desc',
-        },
+        orderBy: [{ year: "desc" }, { semester: "desc" }],
         ...paginationParams,
       });
 
@@ -97,7 +93,7 @@ export class PrismaCourseCompletionWorkDataRepository
 
     return {
       courseCompletionWorkData: courseDeparturesData.map((departureData) =>
-        PrismaCourseCompletionWorkDataMapper.toDomain(departureData),
+        PrismaCourseCompletionWorkDataMapper.toDomain(departureData)
       ),
       totalItems: totalCourseCompletionWorkData,
       totalPages: pagination
@@ -108,7 +104,7 @@ export class PrismaCourseCompletionWorkDataRepository
 
   async findForIndicators(
     courseId: string,
-    filters?: FindForIndicatorsFilter,
+    filters?: FindForIndicatorsFilter
   ): Promise<CourseCompletionWorkData[]> {
     const CourseCompletionWorkData =
       await this.prisma.courseCompletionWorkData.findMany({
@@ -124,21 +120,19 @@ export class PrismaCourseCompletionWorkDataRepository
                 },
               }),
         },
-        orderBy: {
-          year: 'desc',
-        },
+        orderBy: [{ year: "desc" }, { semester: "desc" }],
       });
 
     return CourseCompletionWorkData.map((departureData) =>
-      PrismaCourseCompletionWorkDataMapper.toDomain(departureData),
+      PrismaCourseCompletionWorkDataMapper.toDomain(departureData)
     );
   }
 
   async create(
-    courseCompletionWorkData: CourseCompletionWorkData,
+    courseCompletionWorkData: CourseCompletionWorkData
   ): Promise<void> {
     const data = PrismaCourseCompletionWorkDataMapper.toPrismaCreate(
-      courseCompletionWorkData,
+      courseCompletionWorkData
     );
 
     await this.prisma.courseCompletionWorkData.create({
@@ -147,10 +141,10 @@ export class PrismaCourseCompletionWorkDataRepository
   }
 
   async save(
-    courseCompletionWorkData: CourseCompletionWorkData,
+    courseCompletionWorkData: CourseCompletionWorkData
   ): Promise<void> {
     const data = PrismaCourseCompletionWorkDataMapper.toPrismaUpdate(
-      courseCompletionWorkData,
+      courseCompletionWorkData
     );
 
     await this.prisma.courseCompletionWorkData.update({
@@ -162,7 +156,7 @@ export class PrismaCourseCompletionWorkDataRepository
   }
 
   async delete(
-    courseCompletionWorkData: CourseCompletionWorkData,
+    courseCompletionWorkData: CourseCompletionWorkData
   ): Promise<void> {
     await this.prisma.courseCompletionWorkData.delete({
       where: {
