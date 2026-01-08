@@ -1,6 +1,6 @@
-import { z } from 'zod';
-import { ZodValidationPipe } from '@/infra/http/pipes/zod-validation-pipe';
-import { RegisterStudentUseCase } from '@/domain/application/use-cases/register-student/register-student';
+import { z } from "zod";
+import { ZodValidationPipe } from "@/infra/http/pipes/zod-validation-pipe";
+import { RegisterStudentUseCase } from "@/domain/application/use-cases/register-student/register-student";
 import {
   BadRequestException,
   Body,
@@ -9,17 +9,16 @@ import {
   ForbiddenException,
   HttpCode,
   Post,
-} from '@nestjs/common';
-import { UserAlreadyExistsError } from '@/domain/application/use-cases/errors/user-already-exists-error';
-import { CurrentUser } from '@/infra/auth/current-user-decorator';
-import { SessionUser } from '@/domain/entities/user';
-import { STUDENT_TYPE } from '@/domain/entities/student';
-import { NotAllowedError } from '@/core/errors/errors/not-allowed-error';
+} from "@nestjs/common";
+import { UserAlreadyExistsError } from "@/domain/application/use-cases/errors/user-already-exists-error";
+import { CurrentUser } from "@/infra/auth/current-user-decorator";
+import { SessionUser } from "@/domain/entities/user";
+import { STUDENT_TYPE } from "@/domain/entities/student";
+import { NotAllowedError } from "@/core/errors/errors/not-allowed-error";
 
 const registerStudentBodySchema = z.object({
   name: z.string(),
   email: z.email(),
-  password: z.string(),
   matriculation: z.string().min(10).max(10),
   courseId: z.uuid(),
   type: z.enum(STUDENT_TYPE),
@@ -27,7 +26,7 @@ const registerStudentBodySchema = z.object({
 
 type RegisterStudentBodySchema = z.infer<typeof registerStudentBodySchema>;
 
-@Controller('/students')
+@Controller("/students")
 export class RegisterStudentController {
   constructor(private registerStudent: RegisterStudentUseCase) {}
 
@@ -36,15 +35,14 @@ export class RegisterStudentController {
   async handle(
     @CurrentUser() sessionUser: SessionUser,
     @Body(new ZodValidationPipe(registerStudentBodySchema))
-    body: RegisterStudentBodySchema,
+    body: RegisterStudentBodySchema
   ) {
-    const { name, email, password, matriculation, courseId, type } = body;
+    const { name, email, matriculation, courseId, type } = body;
 
     const result = await this.registerStudent.execute({
       student: {
         name,
         email,
-        password,
         matriculation,
         courseId,
         type,
