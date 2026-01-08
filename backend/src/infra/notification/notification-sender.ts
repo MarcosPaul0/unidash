@@ -1,10 +1,11 @@
-import { Injectable } from '@nestjs/common';
-import { EmailSender } from './email-sender/email-sender';
+import { Injectable } from "@nestjs/common";
+import { EmailSender } from "./email-sender/email-sender";
 import {
   NotificationSender,
   SendAccountActivationNotificationParams,
   SendPasswordResetNotificationParams,
-} from '@/domain/application/notification-sender/notification-sender';
+  SendIncomingStudentRegistrationNotificationParams,
+} from "@/domain/application/notification-sender/notification-sender";
 
 @Injectable()
 export class NotificationSenderImpl implements NotificationSender {
@@ -28,5 +29,11 @@ export class NotificationSenderImpl implements NotificationSender {
       user,
       passwordResetToken,
     });
+  }
+
+  async sendIncomingStudentRegistrationNotification(
+    params: SendIncomingStudentRegistrationNotificationParams
+  ): Promise<void> {
+    this.emailSender.sendIncomingStudentRegistrationEmail(params);
   }
 }
