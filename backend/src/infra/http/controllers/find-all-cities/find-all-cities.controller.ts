@@ -1,4 +1,4 @@
-import { Controller, Get, HttpCode, Param, Query } from "@nestjs/common";
+import { Controller, Get, HttpCode, Query } from "@nestjs/common";
 import { CityPresenter } from "../../presenters/city-presenter";
 import { Public } from "@/infra/auth/public";
 import { FindAllCitiesUseCase } from "@/domain/application/use-cases/find-all-cities/find-all-cities";
