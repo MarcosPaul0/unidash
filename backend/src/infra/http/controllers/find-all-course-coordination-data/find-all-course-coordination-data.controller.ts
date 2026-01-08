@@ -1,20 +1,11 @@
-import {
-  Body,
-  Controller,
-  Get,
-  HttpCode,
-  Param,
-  Query,
-  UsePipes,
-} from '@nestjs/common';
-import { Public } from '@/infra/auth/public';
-import z from 'zod';
-import { ZodValidationPipe } from '../../pipes/zod-validation-pipe';
-import { SEMESTER } from '@/domain/entities/course-data';
-import { FindAllCourseCoordinationDataUseCase } from '@/domain/application/use-cases/find-all-course-coordination-data/find-all-course-coordination-data';
-import { CourseCoordinationDataPresenter } from '../../presenters/course-coordination-data-presenter';
-import { SessionUser } from '@/domain/entities/user';
-import { CurrentUser } from '@/infra/auth/current-user-decorator';
+import { Controller, Get, HttpCode, Param, Query } from "@nestjs/common";
+import z from "zod";
+import { ZodValidationPipe } from "../../pipes/zod-validation-pipe";
+import { SEMESTER } from "@/domain/entities/course-data";
+import { FindAllCourseCoordinationDataUseCase } from "@/domain/application/use-cases/find-all-course-coordination-data/find-all-course-coordination-data";
+import { CourseCoordinationDataPresenter } from "../../presenters/course-coordination-data-presenter";
+import { SessionUser } from "@/domain/entities/user";
+import { CurrentUser } from "@/infra/auth/current-user-decorator";
 
 const findAllCourseCoordinationDataQuerySchema = z
   .object({
@@ -29,19 +20,19 @@ type FindAllCourseCoordinationDataQuerySchema = z.infer<
   typeof findAllCourseCoordinationDataQuerySchema
 >;
 
-@Controller('/course-coordination-data/:courseId')
+@Controller("/course-coordination-data/:courseId")
 export class FindAllCourseCoordinationDataController {
   constructor(
-    private findAllCourseCoordinationData: FindAllCourseCoordinationDataUseCase,
+    private findAllCourseCoordinationData: FindAllCourseCoordinationDataUseCase
   ) {}
 
   @Get()
   @HttpCode(200)
   async handle(
     @CurrentUser() sessionUser: SessionUser,
-    @Param('courseId') courseId: string,
+    @Param("courseId") courseId: string,
     @Query(new ZodValidationPipe(findAllCourseCoordinationDataQuerySchema))
-    query?: FindAllCourseCoordinationDataQuerySchema,
+    query?: FindAllCourseCoordinationDataQuerySchema
   ) {
     const result = await this.findAllCourseCoordinationData.execute({
       courseId,
@@ -62,7 +53,7 @@ export class FindAllCourseCoordinationDataController {
 
     return {
       courseCoordinationData: result.value.courseCoordinationData.map(
-        CourseCoordinationDataPresenter.toHTTP,
+        CourseCoordinationDataPresenter.toHTTP
       ),
       totalItems: result.value.totalItems,
       totalPages: result.value.totalPages,
