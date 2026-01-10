@@ -65,8 +65,7 @@ export class RegisterStudentUseCase {
       return left(new UserAlreadyExistsError(email));
     }
 
-    // TODO remover código duplicado
-    const password = randomBytes(12).toString("base64").slice(0, 12);
+    const password = this.hasher.generatePassword();
 
     const hashedPassword = await this.hasher.hash(password);
 
