@@ -1,5 +1,5 @@
-import { z } from 'zod';
-import { ZodValidationPipe } from '@/infra/http/pipes/zod-validation-pipe';
+import { z } from "zod";
+import { ZodValidationPipe } from "@/infra/http/pipes/zod-validation-pipe";
 import {
   BadRequestException,
   Body,
@@ -8,13 +8,13 @@ import {
   ForbiddenException,
   HttpCode,
   Post,
-} from '@nestjs/common';
-import { CurrentUser } from '@/infra/auth/current-user-decorator';
-import { SessionUser } from '@/domain/entities/user';
-import { NotAllowedError } from '@/core/errors/errors/not-allowed-error';
-import { SEMESTER } from '@/domain/entities/course-data';
-import { RegisterCourseCoordinationDataUseCase } from '@/domain/application/use-cases/register-course-coordination-data/register-course-coordination-data';
-import { CourseCoordinationDataAlreadyExistsError } from '@/domain/application/use-cases/errors/course-coordination-data-already-exists-error';
+} from "@nestjs/common";
+import { CurrentUser } from "@/infra/auth/current-user-decorator";
+import { SessionUser } from "@/domain/entities/user";
+import { NotAllowedError } from "@/core/errors/errors/not-allowed-error";
+import { SEMESTER } from "@/domain/entities/course-data";
+import { RegisterCourseCoordinationDataUseCase } from "@/domain/application/use-cases/register-course-coordination-data/register-course-coordination-data";
+import { CourseCoordinationDataAlreadyExistsError } from "@/domain/application/use-cases/errors/course-coordination-data-already-exists-error";
 
 const registerCourseCoordinationDataBodySchema = z.object({
   courseId: z.uuid(),
@@ -28,18 +28,18 @@ const registerCourseCoordinationDataBodySchema = z.object({
   meetingsByUndergraduateChamber: z.int().min(0).max(1000),
   meetingsByCourseCouncil: z.int().min(0).max(1000),
   meetingsByNde: z.int().min(0).max(1000),
-  academicActionPlans: z.string().min(10).max(360).optional(),
-  administrativeActionPlans: z.string().min(10).max(360).optional(),
+  academicActionPlans: z.string().max(360).optional(),
+  administrativeActionPlans: z.string().max(360).optional(),
 });
 
 type RegisterCourseCoordinationDataBodySchema = z.infer<
   typeof registerCourseCoordinationDataBodySchema
 >;
 
-@Controller('/course-coordination-data')
+@Controller("/course-coordination-data")
 export class RegisterCourseCoordinationDataController {
   constructor(
-    private registerCourseCoordinationData: RegisterCourseCoordinationDataUseCase,
+    private registerCourseCoordinationData: RegisterCourseCoordinationDataUseCase
   ) {}
 
   @Post()
@@ -47,7 +47,7 @@ export class RegisterCourseCoordinationDataController {
   async handle(
     @CurrentUser() sessionUser: SessionUser,
     @Body(new ZodValidationPipe(registerCourseCoordinationDataBodySchema))
-    body: RegisterCourseCoordinationDataBodySchema,
+    body: RegisterCourseCoordinationDataBodySchema
   ) {
     const result = await this.registerCourseCoordinationData.execute({
       courseCoordinationData: {
