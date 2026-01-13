@@ -30,7 +30,7 @@ export default async function RegisterCourseTeacherWorkloadPage({
         breadcrumbItems={[
           {
             label: "Dados de carga horária do docente no curso",
-            link: `${APP_ROUTES.private.courseTeacherWorkloadData}${courseId}`,
+            link: APP_ROUTES.private.courseTeacherWorkloadData,
             fromCourse: true,
           },
         ]}
