@@ -3,6 +3,7 @@ import { UserRole } from "./admin.response";
 export const STUDENT_TYPE = {
   incomingStudent: "incomingStudent",
   outgoingStudent: "outgoingStudent",
+  regularStudent: "regularStudent",
 } as const;
 
 export type StudentType = (typeof STUDENT_TYPE)[keyof typeof STUDENT_TYPE];
