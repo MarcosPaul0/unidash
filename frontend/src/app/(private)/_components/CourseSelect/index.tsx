@@ -101,7 +101,7 @@ export function CourseSelect({ type }: CourseSelectProps) {
   return (
     <Select
       onValueChange={handleChangeCourse}
-      value={activeCourse ? activeCourse.id : undefined}
+      value={activeCourse ? activeCourse.id : ""}
       disabled={selectIsDisabled}
     >
       <SelectTrigger
@@ -110,6 +110,7 @@ export function CourseSelect({ type }: CourseSelectProps) {
             px-2 md:px-4 text-sm md:text-xl font-title font-semibold text-button-foreground
             [&_svg:not([class*='text-'])]:text-button-foreground rounded-2xl
             disabled:cursor-default disabled:text-button-foreground disabled:border-button
+            transition-all duration-300 hover:brightness-110 cursor-pointer
           `}
       >
         <GraduationCapIcon className="text-button-foreground size-4 md:size-6" />
