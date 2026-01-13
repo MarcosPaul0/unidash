@@ -160,8 +160,33 @@ export const registerStudentIncomingDataDtoSchema = z.object({
   universityChoiceReasons: z.array(z.enum(UNIVERSITY_CHOICE_REASON)),
 });
 
+export const registerStudentIncomingFromEmailDataDtoSchema = z.object({
+  workExpectation: z.enum(WORK_EXPECTATION),
+  currentEducation: z.enum(CURRENT_EDUCATION),
+  englishProficiencyLevel: z.enum(ENGLISH_PROFICIENCY_LEVEL),
+  nocturnalPreference: z.boolean(),
+  knowRelatedCourseDifference: z.boolean(),
+  readPedagogicalProject: z.boolean(),
+  affinityByDisciplines: z.array(
+    z.object({
+      affinityLevel: z.enum(AFFINITY_LEVEL),
+      discipline: z.enum(HIGH_SCHOOL_DISCIPLINE),
+    })
+  ),
+  cityId: z.uuid(),
+  assets: z.array(z.enum(ASSET)),
+  courseChoiceReasons: z.array(z.enum(COURSE_CHOICE_REASON)),
+  hobbyOrHabits: z.array(z.enum(HOBBY_OR_HABIT)),
+  technologies: z.array(z.enum(TECHNOLOGY)),
+  universityChoiceReasons: z.array(z.enum(UNIVERSITY_CHOICE_REASON)),
+});
+
 export type RegisterStudentIncomingDataDto = z.infer<
   typeof registerStudentIncomingDataDtoSchema
+>;
+
+export type RegisterStudentIncomingFromEmailDataDto = z.infer<
+  typeof registerStudentIncomingFromEmailDataDtoSchema
 >;
 
 export const filterStudentIncomingDataDtoSchema = z
