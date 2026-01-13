@@ -29,8 +29,20 @@ export const courseCoordinationDataDtoSchema = z.object({
     .transform(Number)
     .pipe(z.number().int().min(0).max(1000)),
   meetingsByNde: z.transform(Number).pipe(z.number().int().min(0).max(1000)),
-  academicActionPlans: z.string().min(10).max(360).optional(),
-  administrativeActionPlans: z.string().min(10).max(360).optional(),
+  academicActionPlans: z
+    .string()
+    .refine((value) => value.length === 0 || value.length >= 10, {
+      message: "Deve conter no mínimo 10 caracteres",
+    })
+    .max(360)
+    .optional(),
+  administrativeActionPlans: z
+    .string()
+    .refine((value) => value.length === 0 || value.length >= 10, {
+      message: "Deve conter no mínimo 10 caracteres",
+    })
+    .max(360)
+    .optional(),
 });
 
 export type RegisterCourseCoordinationDataDto = z.infer<
