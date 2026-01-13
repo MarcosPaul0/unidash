@@ -20,7 +20,7 @@ export function UserMenu() {
       className={`
         hidden md:flex md:mr-0 md:ml-auto
         p-2 bg-menu text-menu-foreground rounded-full
-        items-center gap-2 cursor-pointer 
+        items-center gap-2
       `}
     >
       <Avatar>
