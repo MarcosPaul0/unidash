@@ -8,8 +8,12 @@ export const publicRoutes: string[] = Object.values(APP_ROUTES.public);
 
 export default async function middleware(req: NextRequest) {
   const pathname = req.nextUrl.pathname;
-  const formattedPathname = pathname.replace(
+  let formattedPathname = pathname.replace(
     /[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$/,
+    ""
+  );
+  formattedPathname = formattedPathname.replace(
+    /[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+$/,
     ""
   );
 
