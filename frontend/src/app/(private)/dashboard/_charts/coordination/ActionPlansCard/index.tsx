@@ -23,12 +23,12 @@ export function ActionPlansCard({ actionPlans }: ActionPlansCardProps) {
     initialData: {},
   });
 
-  const hasFirstDescription = Boolean(indicatorsData?.first);
-  const hasSecondDescription = Boolean(indicatorsData?.second);
-
-  if (!hasFirstDescription && !hasSecondDescription) {
-    return null;
-  }
+  const hasFirstDescription =
+    Boolean(indicatorsData?.first?.academicActionPlans) &&
+    Boolean(indicatorsData?.first?.administrativeActionPlans);
+  const hasSecondDescription =
+    Boolean(indicatorsData?.second?.academicActionPlans) &&
+    Boolean(indicatorsData?.second?.administrativeActionPlans);
 
   return (
     <Card>
