@@ -1,4 +1,4 @@
-version: '3.8'
+version: "3.8"
 
 services:
   unidash-api:
@@ -6,7 +6,7 @@ services:
     container_name: unidash-api
     restart: always
     ports:
-      - '3333:3333'
+      - "3333:3333"
     depends_on:
       - postgres
 
@@ -18,8 +18,8 @@ services:
       - ./certbot/conf:/etc/letsencrypt
       - ./certbot/www:/var/www/certbot
     ports:
-      - '80:80'
-      - '443:443'
+      - "80:80"
+      - "443:443"
     depends_on:
       - unidash-api
       - certbot
@@ -33,7 +33,7 @@ services:
       POSTGRES_PASSWORD: ${DB_PASSWORD}
       POSTGRES_DB: ${DB_NAME}
     ports:
-      - '${EXTERNAL_DB_PORT}:5432'
+      - "${EXTERNAL_DB_PORT}:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
