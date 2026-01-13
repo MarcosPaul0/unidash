@@ -25,8 +25,6 @@ export function ExtensionComplementaryActivitiesTable({
     labels: EXTENSION_COMPLEMENTARY_ACTIVITIES_LABELS,
   });
 
-  console.log({ activities, activitiesByYear });
-
   return (
     <Card>
       <CardHeader>
