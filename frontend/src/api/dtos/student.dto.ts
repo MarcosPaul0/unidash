@@ -1,22 +1,15 @@
 import z from "zod";
 import { STUDENT_TYPE } from "../responses/student.response";
 
-export const registerStudentDtoSchema = z
-  .object({
-    name: z.string().min(2).max(200),
-    email: z.email().max(200),
-    password: z.string(),
-    passwordConfirmation: z.string(),
-    matriculation: z
-      .string()
-      .min(10, "Deve ter no mínimo 10 caracteres")
-      .max(10, "Deve ter no máximo 10 caracteres"),
-    type: z.enum(STUDENT_TYPE),
-  })
-  .refine((schema) => schema.password === schema.passwordConfirmation, {
-    message: "As senhas não coincidem",
-    path: ["passwordConfirmation"],
-  });
+export const registerStudentDtoSchema = z.object({
+  name: z.string().min(2).max(200),
+  email: z.email().max(200),
+  matriculation: z
+    .string()
+    .min(10, "Deve ter no mínimo 10 caracteres")
+    .max(10, "Deve ter no máximo 10 caracteres"),
+  type: z.enum(STUDENT_TYPE),
+});
 
 export type RegisterStudentDto = z.infer<typeof registerStudentDtoSchema>;
 
