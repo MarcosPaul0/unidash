@@ -28,6 +28,7 @@ import { StudentIncomingDataCSService } from "@unidash/services/studentIncomingD
 import { APP_ROUTES } from "@unidash/routes/app.routes";
 import { ExceptionHandler } from "@unidash/api/errors/exception.handler";
 import { CitiesSelect } from "@unidash/app/(private)/_components/CitiesSelect";
+import { StudentIncomingDataFormProps } from "./studentIncomingDataForm.interface";
 
 const REGISTER_COURSE_INTERNSHIP_DATA_SUCCESS_MESSAGE =
   "Novo registro de estágio do curso foi adicionado!";
@@ -401,7 +402,9 @@ const INITIAL_VALUES = {
   englishProficiencyLevel: "low",
 } as unknown as RegisterStudentIncomingDataDto;
 
-export function StudentIncomingDataForm() {
+export function StudentIncomingDataForm({
+  incomingStudentToken,
+}: StudentIncomingDataFormProps) {
   const router = useRouter();
 
   const formMethods = useForm<RegisterStudentIncomingDataDto>({
@@ -419,9 +422,37 @@ export function StudentIncomingDataForm() {
     registerStudentIncomingDataDto: RegisterStudentIncomingDataDto
   ) {
     try {
-      await StudentIncomingDataCSService.register(
-        registerStudentIncomingDataDto
-      );
+      if (incomingStudentToken) {
+        await StudentIncomingDataCSService.registerFromEmail(
+          incomingStudentToken,
+          {
+            workExpectation: registerStudentIncomingDataDto.workExpectation,
+            currentEducation: registerStudentIncomingDataDto.currentEducation,
+            englishProficiencyLevel:
+              registerStudentIncomingDataDto.englishProficiencyLevel,
+            nocturnalPreference:
+              registerStudentIncomingDataDto.nocturnalPreference,
+            knowRelatedCourseDifference:
+              registerStudentIncomingDataDto.knowRelatedCourseDifference,
+            readPedagogicalProject:
+              registerStudentIncomingDataDto.readPedagogicalProject,
+            affinityByDisciplines:
+              registerStudentIncomingDataDto.affinityByDisciplines,
+            cityId: registerStudentIncomingDataDto.cityId,
+            assets: registerStudentIncomingDataDto.assets,
+            courseChoiceReasons:
+              registerStudentIncomingDataDto.courseChoiceReasons,
+            hobbyOrHabits: registerStudentIncomingDataDto.hobbyOrHabits,
+            technologies: registerStudentIncomingDataDto.technologies,
+            universityChoiceReasons:
+              registerStudentIncomingDataDto.universityChoiceReasons,
+          }
+        );
+      } else {
+        await StudentIncomingDataCSService.register(
+          registerStudentIncomingDataDto
+        );
+      }
 
       Toast.success(REGISTER_COURSE_INTERNSHIP_DATA_SUCCESS_MESSAGE);
 
