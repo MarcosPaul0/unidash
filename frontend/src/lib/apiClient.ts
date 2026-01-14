@@ -47,50 +47,6 @@ export class ApiClient extends BaseApiClient {
 
     await Cookies.set(COOKIES.token, accessToken);
   }
-
-  public upload<T>(
-    endpoint: string,
-    formData: FormData,
-    onProgress?: (progress: number) => void
-  ): Promise<T> {
-    return new Promise((resolve, reject) => {
-      const xhr = new XMLHttpRequest();
-      xhr.open("POST", `${this.baseUrl}${endpoint}`, true);
-
-      if (
-        this.headers &&
-        (this.headers as Record<string, string>)?.Authorization
-      ) {
-        xhr.setRequestHeader(
-          "Authorization",
-          (this.headers as Record<string, string>)?.Authorization
-        );
-      }
-
-      if (onProgress) {
-        xhr.upload.onprogress = (event) => {
-          if (event.lengthComputable) {
-            onProgress((event.loaded / event.total) * 100);
-          }
-        };
-      }
-
-      xhr.onload = async () => {
-        if (xhr.status >= 200 && xhr.status < 300) {
-          try {
-            resolve(JSON.parse(xhr.responseText) as T);
-          } catch (error) {
-            reject(error);
-          }
-        } else {
-          reject(new Error(`Request failed with status ${xhr.status}`));
-        }
-      };
-
-      xhr.onerror = () => reject(new Error("Request failed"));
-      xhr.send(formData);
-    });
-  }
 }
 
 export const apiClient = await new ApiClient().init();

@@ -54,15 +54,10 @@ export abstract class BaseApiClient {
 
     this.refreshPromise = (async () => {
       try {
-        console.log("=-=-=-=-=-=- COMEÇOU O REFRESH -=-=-=-=-=-=-");
         const refreshResponse = await this.fetchRefresh();
-
-        console.log({ refreshResponse });
 
         if (!refreshResponse.ok) {
           const errorResponse = await refreshResponse.json();
-
-          console.log({ errorResponse });
 
           throw new ApiResponseError(
             errorResponse.message,
@@ -74,9 +69,6 @@ export abstract class BaseApiClient {
 
         await this.manageRefreshResponse(refreshResponse);
       } catch (error) {
-        console.log("-=-=-=-=-=-=- REFRESH ERROR -=-=-=-=-=-=-");
-        console.log(error);
-
         this.clearAuthDataAndRedirect();
         throw error;
       } finally {
@@ -85,6 +77,12 @@ export abstract class BaseApiClient {
     })();
 
     return this.refreshPromise;
+  }
+
+  private response<T>(textResponse?: string): T {
+    return !!textResponse && textResponse.length > 0
+      ? (JSON.parse(textResponse) as T)
+      : (null as T);
   }
 
   private async request<T>(
@@ -131,9 +129,7 @@ export abstract class BaseApiClient {
     }
 
     const textResponse = await response.text();
-    return Boolean(textResponse) && textResponse.length > 0
-      ? (JSON.parse(textResponse) as T)
-      : (null as T);
+    return this.response<T>(textResponse);
   }
 
   public setAuthorizationWithBearerToken(token: string): void {
@@ -173,5 +169,76 @@ export abstract class BaseApiClient {
 
   public delete<T>(endpoint: string, options?: RequestOptions): Promise<T> {
     return this.request<T>(endpoint, { ...options, method: "DELETE" });
+  }
+
+  public async upload<T>(
+    endpoint: string,
+    formData: FormData,
+    onProgress?: (progress: number) => void
+  ): Promise<T> {
+    if (this.refreshPromise) {
+      await this.refreshPromise;
+    }
+
+    return new Promise((resolve, reject) => {
+      const xhr = new XMLHttpRequest();
+      xhr.open("POST", `${this.baseUrl}${endpoint}`, true);
+
+      if (
+        this.headers &&
+        (this.headers as Record<string, string>)?.Authorization
+      ) {
+        xhr.setRequestHeader(
+          "Authorization",
+          (this.headers as Record<string, string>)?.Authorization
+        );
+      }
+
+      if (onProgress) {
+        xhr.upload.onprogress = (event) => {
+          if (event.lengthComputable) {
+            onProgress((event.loaded / event.total) * 100);
+          }
+        };
+      }
+
+      xhr.onload = async () => {
+        if (xhr.status >= 200 && xhr.status < 300) {
+          try {
+            resolve(this.response<T>(xhr.responseText));
+          } catch (error) {
+            reject(error);
+          }
+        } else if (xhr.status === HTTP_STATUS.unauthorized) {
+          // Tenta fazer refresh e reenviar a requisição
+          try {
+            await this.refresh();
+            // Reenvia a requisição após o refresh
+            const result = await this.upload<T>(endpoint, formData, onProgress);
+            resolve(result);
+          } catch (error) {
+            reject(error);
+          }
+        } else {
+          try {
+            const errorResponse = JSON.parse(xhr.responseText);
+
+            reject(
+              new ApiResponseError(
+                errorResponse.message,
+                errorResponse.error,
+                errorResponse.statusCode,
+                endpoint
+              )
+            );
+          } catch {
+            reject(new Error(`Request failed with status ${xhr.status}`));
+          }
+        }
+      };
+
+      xhr.onerror = () => reject(new Error("Request failed"));
+      xhr.send(formData);
+    });
   }
 }
