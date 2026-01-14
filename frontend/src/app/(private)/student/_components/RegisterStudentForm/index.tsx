@@ -25,6 +25,7 @@ import { FormInput } from "@unidash/components/FormInput";
 import { STUDENT_TYPE } from "@unidash/api/responses/student.response";
 import { FormSelect } from "@unidash/components/FormSelect";
 import { HTTP_STATUS } from "@unidash/lib/baseApiClient";
+import { FormFile } from "@unidash/components/FormFile";
 
 export const REGISTER_STUDENT_ERROR_MESSAGES = {
   [HTTP_STATUS.forbidden]:
@@ -46,8 +47,6 @@ export function RegisterStudentForm() {
       name: "",
       email: "",
       matriculation: "",
-      password: "",
-      passwordConfirmation: "",
       type: "incomingStudent",
     },
     resolver: zodResolver(registerStudentDtoSchema),
@@ -82,6 +81,43 @@ export function RegisterStudentForm() {
     }
   }
 
+  async function handleUploadIncomingStudentsPdf(acceptedFiles: File[]) {
+    try {
+      if (!activeCourse) {
+        Toast.error("É necessário selecionar o curso para registrar o aluno!");
+        return;
+      }
+
+      const incomingStudentsFormData = new FormData();
+
+      const incomingStudentsPdf = acceptedFiles[0];
+
+      incomingStudentsFormData.append(
+        "incomingStudentsPdf",
+        incomingStudentsPdf
+      );
+      incomingStudentsFormData.append("courseId", activeCourse.id);
+      incomingStudentsFormData.append("clearIncomingStudents", String(true));
+
+      await StudentCSService.uploadIncomingStudentsPdf(
+        incomingStudentsFormData,
+        (progress) => console.log(progress)
+      );
+
+      Toast.success(REGISTER_STUDENT_SUCCESS_MESSAGE);
+
+      router.push(`${APP_ROUTES.private.student}${activeCourse.id}`);
+    } catch (error) {
+      ExceptionHandler.handle({
+        error,
+        errorMap: REGISTER_STUDENT_ERROR_MESSAGES,
+        onError: (handledError) => {
+          Toast.error(handledError.message);
+        },
+      });
+    }
+  }
+
   return (
     <FormProvider {...formMethods}>
       <form onSubmit={handleSubmit(registerStudent)}>
@@ -91,6 +127,23 @@ export function RegisterStudentForm() {
           </CardHeader>
 
           <CardContent className="flex flex-col gap-4 md:gap-8">
+            <FormFile
+              control={control}
+              name="incomingStudentsPdf"
+              label={
+                <span className="text-center max-w-md">
+                  Envie o documento PDF de{" "}
+                  <strong className="text-primary">
+                    Lista de Contatos de Alunos
+                  </strong>{" "}
+                  do Curso de {activeCourse?.name}
+                </span>
+              }
+              onDrop={handleUploadIncomingStudentsPdf}
+            />
+
+            <span className="mx-auto my-0">Ou preencha o formulário</span>
+
             <CardInputsRow>
               <FormInput
                 control={control}
@@ -106,25 +159,6 @@ export function RegisterStudentForm() {
                 placeholder="Digite o email do aluno"
                 label="E-mail"
                 helper={errors.email?.message}
-              />
-            </CardInputsRow>
-
-            <CardInputsRow>
-              <FormInput
-                control={control}
-                name="password"
-                type="password"
-                placeholder="Defina uma senha para o aluno"
-                label="Senha"
-                helper={errors.password?.message}
-              />
-              <FormInput
-                control={control}
-                name="passwordConfirmation"
-                type="password"
-                placeholder="Confirme a senha para o aluno"
-                label="Confirmar senha"
-                helper={errors.passwordConfirmation?.message}
               />
             </CardInputsRow>
 
