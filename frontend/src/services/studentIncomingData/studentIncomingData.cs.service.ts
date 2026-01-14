@@ -5,6 +5,7 @@ import { StudentIncomingDataParamsBuilder } from "./studentIncomingDataParams.bu
 import {
   FilterStudentIncomingDataDto,
   RegisterStudentIncomingDataDto,
+  RegisterStudentIncomingFromEmailDataDto,
 } from "@unidash/api/dtos/studentIncomingData.dto";
 import {
   CheckIncomingStudentRespondedResponse,
@@ -22,7 +23,7 @@ export class StudentIncomingDataCSService {
       .applyFilters(filters)
       .build();
 
-    const StudentIncomingDataResponse =
+    const studentIncomingDataResponse =
       await apiClient.get<StudentIncomingDataResponse>(
         `${UNIDASH_API_ROUTES.studentIncomingData.getAll}${courseId}`,
         {
@@ -30,7 +31,7 @@ export class StudentIncomingDataCSService {
         }
       );
 
-    return StudentIncomingDataResponse;
+    return studentIncomingDataResponse;
   }
 
   static async checkIncomingStudentResponded(): Promise<CheckIncomingStudentRespondedResponse> {
@@ -45,7 +46,7 @@ export class StudentIncomingDataCSService {
   static async register(
     registerStudentIncomingDataDto: RegisterStudentIncomingDataDto
   ): Promise<void> {
-    const StudentIncomingDataResponse = await apiClient.post<void>(
+    const studentIncomingDataResponse = await apiClient.post<void>(
       UNIDASH_API_ROUTES.studentIncomingData.register,
       {
         year: registerStudentIncomingDataDto.year,
@@ -71,14 +72,49 @@ export class StudentIncomingDataCSService {
       }
     );
 
-    return StudentIncomingDataResponse;
+    return studentIncomingDataResponse;
+  }
+
+  static async registerFromEmail(
+    incomingStudentToken: string,
+    registerStudentIncomingFromEmailDataDto: RegisterStudentIncomingFromEmailDataDto
+  ): Promise<void> {
+    const studentIncomingDataResponse = await apiClient.post<void>(
+      `${UNIDASH_API_ROUTES.studentIncomingData.registerFromEmail}${incomingStudentToken}`,
+      {
+        workExpectation:
+          registerStudentIncomingFromEmailDataDto.workExpectation,
+        englishProficiencyLevel:
+          registerStudentIncomingFromEmailDataDto.englishProficiencyLevel,
+        currentEducation:
+          registerStudentIncomingFromEmailDataDto.currentEducation,
+        nocturnalPreference:
+          registerStudentIncomingFromEmailDataDto.nocturnalPreference,
+        knowRelatedCourseDifference:
+          registerStudentIncomingFromEmailDataDto.knowRelatedCourseDifference,
+        readPedagogicalProject:
+          registerStudentIncomingFromEmailDataDto.readPedagogicalProject,
+        affinityByDisciplines:
+          registerStudentIncomingFromEmailDataDto.affinityByDisciplines,
+        assets: registerStudentIncomingFromEmailDataDto.assets,
+        courseChoiceReasons:
+          registerStudentIncomingFromEmailDataDto.courseChoiceReasons,
+        hobbyOrHabits: registerStudentIncomingFromEmailDataDto.hobbyOrHabits,
+        technologies: registerStudentIncomingFromEmailDataDto.technologies,
+        universityChoiceReasons:
+          registerStudentIncomingFromEmailDataDto.universityChoiceReasons,
+        cityId: registerStudentIncomingFromEmailDataDto.cityId,
+      }
+    );
+
+    return studentIncomingDataResponse;
   }
 
   static async delete(studentIncomingDataId: string): Promise<void> {
-    const StudentIncomingDataResponse = await apiClient.delete<void>(
+    const studentIncomingDataResponse = await apiClient.delete<void>(
       `${UNIDASH_API_ROUTES.studentIncomingData.delete}${studentIncomingDataId}`
     );
 
-    return StudentIncomingDataResponse;
+    return studentIncomingDataResponse;
   }
 }
