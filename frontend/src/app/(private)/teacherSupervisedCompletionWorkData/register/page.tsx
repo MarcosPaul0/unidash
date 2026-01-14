@@ -11,6 +11,7 @@ export default function RegisterTeacherSupervisedCompletionWorkDataPage() {
           {
             label: "Indicadores de orientações em TCCs",
             link: APP_ROUTES.private.teacherSupervisedCompletionWorkData,
+            fromCourse: true,
           },
         ]}
       />
