@@ -1,12 +1,4 @@
 import { Toolbar } from "../../../_components/Toolbar";
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from "@unidash/components/Breadcrumb";
 import { APP_ROUTES } from "@unidash/routes/app.routes";
 import { EditStudentForm } from "../../_components/EditStudentForm";
 import { StudentSSRService } from "@unidash/services/student/student.ssr.service";
@@ -24,23 +16,15 @@ export default async function EditStudentPage({
 
   return (
     <>
-      <Toolbar>
-        <Breadcrumb>
-          <BreadcrumbList>
-            <BreadcrumbItem>
-              <BreadcrumbLink href={APP_ROUTES.private.courses}>
-                Lista de alunos
-              </BreadcrumbLink>
-            </BreadcrumbItem>
-
-            <BreadcrumbSeparator />
-
-            <BreadcrumbItem>
-              <BreadcrumbPage>Editar aluno</BreadcrumbPage>
-            </BreadcrumbItem>
-          </BreadcrumbList>
-        </Breadcrumb>
-      </Toolbar>
+      <Toolbar
+        breadcrumbPage="Editar aluno"
+        breadcrumbItems={[
+          {
+            label: "Lista de alunos",
+            link: `${APP_ROUTES.private.student}${studentResponse.student.courseId}`,
+          },
+        ]}
+      />
 
       <EditStudentForm student={studentResponse.student} />
     </>
