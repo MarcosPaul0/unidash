@@ -9,6 +9,8 @@ import { UNIDASH_API_ROUTES } from "@unidash/routes/unidashApi.routes";
 import { AdminCSService } from "../admin/admin.cs.service";
 import { StudentCSService } from "../student/student.cs.service";
 import { TeacherCSService } from "../teacher/teacher.cs.service";
+import { RecoverPasswordDto } from "@unidash/api/dtos/recoverPassword.dto";
+import { ForgotPasswordDto } from "@unidash/api/dtos/forgotPassword.dto";
 
 export class AuthCSService {
   static async auth(authenticateDto: AuthDto): Promise<AuthResponse> {
@@ -56,5 +58,31 @@ export class AuthCSService {
       session: null,
       teacherCourses: [],
     };
+  }
+
+  static async forgotPassword(
+    forgotPasswordDto: ForgotPasswordDto
+  ): Promise<void> {
+    const forgotPasswordResponse = await apiClient.post<void>(
+      UNIDASH_API_ROUTES.auth.forgotPassword,
+      forgotPasswordDto
+    );
+
+    return forgotPasswordResponse;
+  }
+
+  static async recoverPassword(
+    recoverPasswordToken: string,
+    recoverPasswordDto: RecoverPasswordDto
+  ): Promise<void> {
+    const recoverPasswordResponse = await apiClient.patch<void>(
+      UNIDASH_API_ROUTES.auth.recoverPassword,
+      {
+        newPassword: recoverPasswordDto.newPassword,
+        passwordResetToken: recoverPasswordToken,
+      }
+    );
+
+    return recoverPasswordResponse;
   }
 }
