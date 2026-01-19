@@ -3,9 +3,11 @@ export const UNIDASH_API_ROUTES = {
     login: "/sessions",
     refresh: "/token/refresh",
     validateSession: "/validate-token",
+    forgotPassword: "/forgot-password",
+    recoverPassword: "/users/reset-password",
   },
   teacher: {
-    getById: "/teachers/",
+    getById: "/teachers/by-id/",
     getBySession: "/teachers/me",
     register: "/teachers",
     getAll: "/teachers",
@@ -19,11 +21,12 @@ export const UNIDASH_API_ROUTES = {
     delete: "/teacher-courses/",
   },
   student: {
-    getById: "/students/",
+    getById: "/students/by-id/",
     getBySession: "/students/me",
     getByCourse: "/students/by-course/",
     register: "/students",
     update: "/students/",
+    uploadIncomingStudentsPdf: "/students/incoming/upload",
     delete: "/students/",
   },
   admin: {
@@ -149,6 +152,7 @@ export const UNIDASH_API_ROUTES = {
   studentIncomingData: {
     getAll: "/student-incoming-data/",
     register: "/student-incoming-data",
+    registerFromEmail: "/student-incoming-data/from-email/",
     delete: "/student-incoming-data/",
     checkResponded: "/student-incoming-check-responded",
   },
