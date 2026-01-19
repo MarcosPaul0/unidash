@@ -97,7 +97,8 @@ export const APP_ROUTES = {
   public: {
     landingPage: "/",
     login: "/login",
-    forgotPassword: "/forgot-password",
-    recoverPassword: "/recover-password",
+    forgotPassword: "/forgotPassword",
+    recoverPassword: "/recoverPassword/",
+    registerStudentIncomingDataFromEmail: "/studentIncomingData/register/",
   },
 } as const;
