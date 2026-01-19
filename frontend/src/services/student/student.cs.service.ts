@@ -19,26 +19,25 @@ export class StudentCSService {
     courseId: string,
     registerStudentDto: RegisterStudentDto
   ): Promise<void> {
-    const courseResponse = await apiClient.post<void>(
+    const studentResponse = await apiClient.post<void>(
       UNIDASH_API_ROUTES.student.register,
       {
         name: registerStudentDto.name,
         email: registerStudentDto.email,
         matriculation: registerStudentDto.matriculation,
-        password: registerStudentDto.password,
         type: registerStudentDto.type,
         courseId,
       }
     );
 
-    return courseResponse;
+    return studentResponse;
   }
 
   static async update(
     studentId: string,
     updateStudentDto: UpdateStudentDto
   ): Promise<void> {
-    const courseResponse = await apiClient.patch<void>(
+    const studentResponse = await apiClient.patch<void>(
       `${UNIDASH_API_ROUTES.student.update}${studentId}`,
       {
         name: updateStudentDto.name,
@@ -47,14 +46,27 @@ export class StudentCSService {
       }
     );
 
-    return courseResponse;
+    return studentResponse;
   }
 
   static async delete(studentId: string): Promise<void> {
-    const courseResponse = await apiClient.delete<void>(
+    const studentResponse = await apiClient.delete<void>(
       `${UNIDASH_API_ROUTES.student.delete}${studentId}`
     );
 
-    return courseResponse;
+    return studentResponse;
+  }
+
+  static async uploadIncomingStudentsPdf(
+    incomingStudentsDto: FormData,
+    onUploadProgress: (progress: number) => void
+  ): Promise<void> {
+    const studentsResponse = await apiClient.upload<void>(
+      UNIDASH_API_ROUTES.student.uploadIncomingStudentsPdf,
+      incomingStudentsDto,
+      onUploadProgress
+    );
+
+    return studentsResponse;
   }
 }
