@@ -29,6 +29,7 @@ import { TECHNOLOGY } from "@/domain/entities/student-technology";
 import { UNIVERSITY_CHOICE_REASON } from "@/domain/entities/student-university-choice-reason";
 import { RegisterStudentIncomingDataFromEmailUseCase } from "@/domain/application/use-cases/register-student-incoming-data-from-email/register-student-incoming-data-from-email";
 import { Public } from "@/infra/auth/public";
+import { RegisterStudentIncomingDataTokenExpiredError } from "@/domain/application/use-cases/errors/register-student-incoming-data-token-expired-error";
 
 const registerStudentIncomingDataFromEmailBodySchema = z.object({
   cityId: z.uuid(),
@@ -84,6 +85,8 @@ export class RegisterStudentIncomingDataFromEmailController {
           throw new ConflictException(error.message);
         case NotAllowedError:
           throw new ForbiddenException(error.message);
+        case RegisterStudentIncomingDataTokenExpiredError:
+          throw new BadRequestException(error.message);
         default:
           throw new BadRequestException(error.message);
       }
