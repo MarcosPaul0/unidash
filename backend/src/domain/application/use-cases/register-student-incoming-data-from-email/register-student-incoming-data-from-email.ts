@@ -39,6 +39,7 @@ import { CityNotFoundError } from "../errors/city-not-found-error";
 import { TokenEncrypter } from "../../cryptography/token-encrypter";
 import { StudentsRepository } from "../../repositories/students-repository";
 import { NotAllowedError } from "@/core/errors/errors/not-allowed-error";
+import { RegisterStudentIncomingDataTokensRepository } from "../../repositories/register-student-incoming-data-tokens-repository";
 
 interface RegisterStudentIncomingDataFromEmailUseCaseRequest {
   studentIncomingData: {
@@ -75,6 +76,7 @@ type RegisterStudentIncomingDataFromEmailUseCaseResponse = Either<
 @Injectable()
 export class RegisterStudentIncomingDataFromEmailUseCase {
   constructor(
+    private registerStudentIncomingDataTokenRepository: RegisterStudentIncomingDataTokensRepository,
     private studentRepository: StudentsRepository,
     private citiesRepository: CitiesRepository,
     private studentIncomingDataRepository: StudentIncomingDataRepository,
@@ -84,8 +86,7 @@ export class RegisterStudentIncomingDataFromEmailUseCase {
     private studentHobbyOrHabitDataRepository: StudentHobbyOrHabitDataRepository,
     private studentTechnologyDataRepository: StudentTechnologyDataRepository,
     private studentUniversityChoiceReasonDataRepository: StudentUniversityChoiceReasonDataRepository,
-    private authorizationService: AuthorizationService,
-    private encrypter: TokenEncrypter
+    private authorizationService: AuthorizationService
   ) {}
 
   async execute({
@@ -106,15 +107,17 @@ export class RegisterStudentIncomingDataFromEmailUseCase {
     },
     incomingStudentToken,
   }: RegisterStudentIncomingDataFromEmailUseCaseRequest): Promise<RegisterStudentIncomingDataFromEmailUseCaseResponse> {
-    const payload =
-      await this.encrypter.verifyIncomingStudentToken(incomingStudentToken);
+    const registerStudentIncomingDataToken =
+      await this.registerStudentIncomingDataTokenRepository.findByToken(
+        incomingStudentToken
+      );
 
-    if (!payload) {
+    if (!registerStudentIncomingDataToken) {
       return left(new NotAllowedError());
     }
 
     const incomingStudent = await this.studentRepository.findById(
-      payload.sub as string
+      registerStudentIncomingDataToken.userId.toString()
     );
 
     if (!incomingStudent) {

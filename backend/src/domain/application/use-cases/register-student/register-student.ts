@@ -13,6 +13,9 @@ import { AccountActivationToken } from "@/domain/entities/account-activation-tok
 import { SessionUser } from "@/domain/entities/user";
 import { AuthorizationService } from "@/infra/authorization/authorization.service";
 import { TokenEncrypter } from "../../cryptography/token-encrypter";
+import { RegisterStudentIncomingDataTokensRepository } from "../../repositories/register-student-incoming-data-tokens-repository";
+import { EnvService } from "@/infra/env/env.service";
+import { RegisterStudentIncomingDataToken } from "@/domain/entities/register-student-incoming-data-token";
 
 interface RegisterStudentUseCaseRequest {
   student: {
@@ -41,7 +44,8 @@ export class RegisterStudentUseCase {
     private hasher: Hasher,
     private notificationSender: NotificationSender,
     private authorizationService: AuthorizationService,
-    private encrypter: TokenEncrypter
+    private registerStudentIncomingDataTokenRepository: RegisterStudentIncomingDataTokensRepository,
+    private envService: EnvService
   ) {}
 
   async execute({
@@ -92,17 +96,29 @@ export class RegisterStudentUseCase {
     );
 
     if (type === "incomingStudent") {
-      const incomingStudentToken =
-        await this.encrypter.generateIncomingStudentToken({
-          sub: student.id.toString(),
+      var registerStudentIncomingDataInDays = Number(
+        this.envService.get("JWT_INCOMING_STUDENT_EXPIRATION_DAYS")
+      );
+
+      const registerIncomingStudentDataToken =
+        RegisterStudentIncomingDataToken.create({
+          userId: student.id,
+          expiresAt: dayjs()
+            .add(registerStudentIncomingDataInDays, "d")
+            .toDate(),
+          token: randomUUID(),
         });
+
+      await this.registerStudentIncomingDataTokenRepository.create(
+        registerIncomingStudentDataToken
+      );
 
       await this.notificationSender.sendIncomingStudentRegistrationNotification(
         {
           name: student.name,
           email: student.email,
           password: password,
-          incomingStudentToken,
+          incomingStudentToken: registerIncomingStudentDataToken.token,
         }
       );
     }
