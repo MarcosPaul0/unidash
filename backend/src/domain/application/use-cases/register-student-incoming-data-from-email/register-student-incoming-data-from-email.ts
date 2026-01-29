@@ -36,10 +36,11 @@ import { StudentHobbyOrHabitData } from "@/domain/entities/student-hobby-or-habi
 import { StudentTechnologyData } from "@/domain/entities/student-technology-data";
 import { CitiesRepository } from "../../repositories/cities-repository";
 import { CityNotFoundError } from "../errors/city-not-found-error";
-import { TokenEncrypter } from "../../cryptography/token-encrypter";
 import { StudentsRepository } from "../../repositories/students-repository";
 import { NotAllowedError } from "@/core/errors/errors/not-allowed-error";
 import { RegisterStudentIncomingDataTokensRepository } from "../../repositories/register-student-incoming-data-tokens-repository";
+import dayjs from "dayjs";
+import { RegisterStudentIncomingDataTokenExpiredError } from "../errors/register-student-incoming-data-token-expired-error";
 
 interface RegisterStudentIncomingDataFromEmailUseCaseRequest {
   studentIncomingData: {
@@ -114,6 +115,14 @@ export class RegisterStudentIncomingDataFromEmailUseCase {
 
     if (!registerStudentIncomingDataToken) {
       return left(new NotAllowedError());
+    }
+
+    const isTokenExpired = dayjs(
+      registerStudentIncomingDataToken.expiresAt
+    ).isBefore(new Date());
+
+    if (isTokenExpired) {
+      return left(new RegisterStudentIncomingDataTokenExpiredError());
     }
 
     const incomingStudent = await this.studentRepository.findById(
