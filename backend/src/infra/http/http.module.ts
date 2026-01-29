@@ -250,6 +250,7 @@ import { UploadIncomingStudentsController } from "./controllers/upload-incoming-
 import { UploadIncomingStudentsUseCase } from "@/domain/application/use-cases/upload-incoming-students/upload-incoming-students";
 import { RegisterStudentIncomingDataFromEmailController } from "./controllers/register-student-incoming-data-from-email/register-student-incoming-data-from-email.controller";
 import { RegisterStudentIncomingDataFromEmailUseCase } from "@/domain/application/use-cases/register-student-incoming-data-from-email/register-student-incoming-data-from-email";
+import { ServicesModule } from "@/domain/application/services/services.module";
 
 @Module({
   imports: [
@@ -258,6 +259,7 @@ import { RegisterStudentIncomingDataFromEmailUseCase } from "@/domain/applicatio
     NotificationSenderModule,
     AxiosHttpModule,
     AuthorizationModule,
+    ServicesModule,
   ],
   controllers: [
     RegisterStudentController,

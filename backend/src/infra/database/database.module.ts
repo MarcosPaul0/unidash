@@ -244,6 +244,7 @@ import { PrismaRegisterStudentIncomingDataTokensRepository } from "./prisma/repo
     CourseTeacherWorkloadDataRepository,
     CourseActiveStudentsDataRepository,
     ActiveStudentsByIngressRepository,
+    RegisterStudentIncomingDataTokensRepository,
   ],
 })
 export class DatabaseModule {}

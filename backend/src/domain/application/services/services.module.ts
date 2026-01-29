@@ -4,5 +4,6 @@ import { StudentExtractorService } from "./student-extractor.service";
 @Module({
   imports: [],
   providers: [StudentExtractorService],
+  exports: [StudentExtractorService],
 })
 export class ServicesModule {}
