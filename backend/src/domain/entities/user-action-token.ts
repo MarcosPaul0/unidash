@@ -4,6 +4,7 @@ import { UniqueEntityId } from '@/core/entities/unique-entity-id'
 export const USER_ACTION_TOKEN_TYPE = {
   accountConfirmation: 'accountConfirmation',
   passwordReset: 'passwordReset',
+  registerStudentIncomingData: 'registerStudentIncomingData'
 } as const
 
 export type UserActionTokenType =

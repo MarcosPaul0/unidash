@@ -124,6 +124,7 @@ model TeacherCourse {
 enum UserActionTokenType {
   accountConfirmation
   passwordReset
+  registerStudentIncomingData
 }
 
 model UserActionToken {
