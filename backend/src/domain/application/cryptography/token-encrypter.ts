@@ -6,11 +6,4 @@ export abstract class TokenEncrypter {
     payload: Record<string, unknown>
   ): Promise<string>;
   abstract verifyToken(token: string): Promise<Record<string, unknown> | null>;
-
-  abstract generateIncomingStudentToken(
-    payload: Record<string, unknown>
-  ): Promise<string>;
-  abstract verifyIncomingStudentToken(
-    token: string
-  ): Promise<Record<string, unknown> | null>;
 }
