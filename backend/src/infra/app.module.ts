@@ -5,6 +5,7 @@ import { AuthModule } from "./auth/auth.module";
 import { HttpModule } from "./http/http.module";
 import { EnvModule } from "./env/env.module";
 import { CronModule } from "@/jobs/cron/cron.module";
+import { ServicesModule } from "../domain/application/services/services.module";
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { CronModule } from "@/jobs/cron/cron.module";
     HttpModule,
     EnvModule,
     CronModule,
+    ServicesModule,
   ],
 })
 export class AppModule {}

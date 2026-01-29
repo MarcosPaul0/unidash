@@ -247,7 +247,6 @@ import { UpdateCourseExtensionActivitiesDataUseCase } from "@/domain/application
 import { UpdateCourseCompletionWorkDataUseCase } from "@/domain/application/use-cases/update-course-completion-work-data/update-course-completion-work-data";
 import { UpdateCourseActiveStudentsDataUseCase } from "@/domain/application/use-cases/update-course-active-students-data/update-course-active-students-data";
 import { UploadIncomingStudentsController } from "./controllers/upload-incoming-students/upload-incoming-students.controller";
-import { StudentExtractorService } from "@/domain/application/services/student-extractor.service";
 import { UploadIncomingStudentsUseCase } from "@/domain/application/use-cases/upload-incoming-students/upload-incoming-students";
 import { RegisterStudentIncomingDataFromEmailController } from "./controllers/register-student-incoming-data-from-email/register-student-incoming-data-from-email.controller";
 import { RegisterStudentIncomingDataFromEmailUseCase } from "@/domain/application/use-cases/register-student-incoming-data-from-email/register-student-incoming-data-from-email";
@@ -506,7 +505,6 @@ import { RegisterStudentIncomingDataFromEmailUseCase } from "@/domain/applicatio
     UpdateCourseExtensionActivitiesDataUseCase,
     UpdateCourseCompletionWorkDataUseCase,
     UpdateCourseActiveStudentsDataUseCase,
-    StudentExtractorService,
     UploadIncomingStudentsUseCase,
     RegisterStudentIncomingDataFromEmailUseCase,
   ],
