@@ -1,35 +1,38 @@
-import { Injectable } from '@nestjs/common';
-import { PrismaService } from '../prisma.service';
-import { RegisterStudentIncomingDataTokensRepository } from '@/domain/application/repositories/register-student-incoming-data-tokens-repository';
-import { RegisterStudentIncomingDataToken } from '@/domain/entities/register-student-incoming-data-token';
-import { PrismaRegisterStudentIncomingDataTokenMapper } from '../mappers/prisma-register-student-incoming-data-token-mapper copy';
+import { Injectable } from "@nestjs/common";
+import { PrismaService } from "../prisma.service";
+import { RegisterStudentIncomingDataTokensRepository } from "@/domain/application/repositories/register-student-incoming-data-tokens-repository";
+import { RegisterStudentIncomingDataToken } from "@/domain/entities/register-student-incoming-data-token";
+import { PrismaRegisterStudentIncomingDataTokenMapper } from "../mappers/prisma-register-student-incoming-data-token-mapper";
 
 @Injectable()
-export class PrismaRegisterStudentIncomingDataTokensRepository
-  implements RegisterStudentIncomingDataTokensRepository
-{
+export class PrismaRegisterStudentIncomingDataTokensRepository implements RegisterStudentIncomingDataTokensRepository {
   constructor(private prisma: PrismaService) {}
 
-  async findByToken(token: string): Promise<RegisterStudentIncomingDataToken | null> {
-    const registerStudentIncomingDataToken = await this.prisma.userActionToken.findUnique(
-      {
+  async findByToken(
+    token: string
+  ): Promise<RegisterStudentIncomingDataToken | null> {
+    const registerStudentIncomingDataToken =
+      await this.prisma.userActionToken.findUnique({
         where: {
           token,
-          actionType: 'registerStudentIncomingData',
+          actionType: "registerStudentIncomingData",
         },
-      },
-    );
+      });
 
     if (!registerStudentIncomingDataToken) {
       return null;
     }
 
-    return PrismaRegisterStudentIncomingDataTokenMapper.toDomain(registerStudentIncomingDataToken);
+    return PrismaRegisterStudentIncomingDataTokenMapper.toDomain(
+      registerStudentIncomingDataToken
+    );
   }
 
-  async create(registerStudentIncomingDataToken: RegisterStudentIncomingDataToken): Promise<void> {
+  async create(
+    registerStudentIncomingDataToken: RegisterStudentIncomingDataToken
+  ): Promise<void> {
     const data = PrismaRegisterStudentIncomingDataTokenMapper.toPrisma(
-      registerStudentIncomingDataToken,
+      registerStudentIncomingDataToken
     );
 
     await this.prisma.userActionToken.create({
@@ -41,7 +44,7 @@ export class PrismaRegisterStudentIncomingDataTokensRepository
     await this.prisma.userActionToken.deleteMany({
       where: {
         userId,
-        actionType: 'registerStudentIncomingData',
+        actionType: "registerStudentIncomingData",
       },
     });
   }
