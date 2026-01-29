@@ -5,8 +5,8 @@ Sua principal função é consolidar dados acadêmicos em dashboards interativos
 
 <br>
 
-<a href="docs/deployment-diagrams/01.pdf" style>
-  <img src="docs/deployment-diagrams/01.png" alt="Diagrama de Implantação" height="500px">
+<a href="docs/deployment-diagrams/deployment-v1.png" style>
+  <img src="docs/deployment-diagrams/deployment-v1.png" alt="Diagrama de Implantação" height="500px">
 </a>
 
 <br><br>
