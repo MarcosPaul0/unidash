@@ -55,24 +55,17 @@ kubernetes/
    kind create cluster --name unidash
    ```
 
-2. **GitHub Container Registry authentication**
+2. **Images from GitHub Container Registry**
+
+   The manifests use these images built by GitHub Actions:
+   - `ghcr.io/marcospaul0/unidash-backend:latest`
+   - `ghcr.io/marcospaul0/unidash-frontend:latest`
+   - `docker.io/postgres:16`
+
+3. **GitHub Container Registry authentication** (if images are private)
    ```bash
-   # Create a GitHub Personal Access Token with read:packages and write:packages permissions
-   # Then login to GHCR
+   # Create a GitHub Personal Access Token with read:packages permission
    echo $GITHUB_TOKEN | docker login ghcr.io -u marcospaul0 --password-stdin
-   ```
-
-3. **Build and push Docker images to GHCR**
-   ```bash
-   # Build and push backend image
-   cd backend
-   docker build -t ghcr.io/marcospaul0/unidash-api:latest -f Dockerfile .
-   docker push ghcr.io/marcospaul0/unidash-api:latest
-
-   # Build and push frontend image
-   cd ../frontend
-   docker build -t ghcr.io/marcospaul0/unidash-app:latest -f Dockerfile.prod .
-   docker push ghcr.io/marcospaul0/unidash-app:latest
    ```
 
 4. **Create image pull secret in Kubernetes** (if images are private)
@@ -84,25 +77,12 @@ kubernetes/
      --docker-email=your-email@example.com
    ```
 
-   If using private images, add to deployment specs:
+   Then add to deployment specs:
    ```yaml
    spec:
      imagePullSecrets:
      - name: ghcr-secret
    ```
-
-**Alternative: Local Development with Kind**
-
-For local development without pushing to GHCR:
-```bash
-# Build images locally with GHCR tags
-docker build -t ghcr.io/marcospaul0/unidash-api:latest -f backend/Dockerfile backend/
-docker build -t ghcr.io/marcospaul0/unidash-app:latest -f frontend/Dockerfile.prod frontend/
-
-# Load images directly into Kind cluster
-kind load docker-image ghcr.io/marcospaul0/unidash-api:latest --name unidash
-kind load docker-image ghcr.io/marcospaul0/unidash-app:latest --name unidash
-```
 
 ## Configuration
 
@@ -129,7 +109,7 @@ Edit `backend/backend-secret.yaml` and replace the following:
 
 Edit `backend/backend-configmap.yaml` and update:
 
-- `FRONTEND_BASE_URL`: Your frontend URL
+- `FRONTEND_BASE_URL`: Your frontend URL (e.g., `http://localhost:30080`)
 - `ACCOUNT_ACTIVATION_URL`: Activation page URL
 - `PASSWORD_RESET_URL`: Password reset page URL
 - `INCOMING_STUDENT_URL`: Incoming students page URL
@@ -292,8 +272,13 @@ kubectl describe configmap backend-config
 - For browser requests, backend needs to be accessible from the client (see Ingress section)
 
 **4. Image pull errors**
-- Ensure images are loaded into Kind: `kind load docker-image <image> --name unidash`
-- Check image names match in deployment YAML files
+- Ensure you're authenticated to GHCR: `docker login ghcr.io`
+- Check image names match GitHub Actions output
+- Verify imagePullSecrets if using private images
+
+**5. ImagePullBackOff**
+- Verify images exist: `docker pull ghcr.io/marcospaul0/unidash-backend:latest`
+- Check image pull secret is configured correctly
 
 ## Cleanup
 
@@ -311,13 +296,27 @@ kubectl delete pvc postgres-pvc
 kubectl delete pv postgres-pv
 ```
 
-## Future Enhancements
+## GitHub Actions Integration
 
-### Setting up Ingress Controller
+The manifests are configured to use images built by GitHub Actions:
+
+- **Backend**: `ghcr.io/marcospaul0/unidash-backend:latest`
+- **Frontend**: `ghcr.io/marcospaul0/unidash-frontend:latest`
+
+When your GitHub Actions workflow runs, it automatically builds and pushes these images to GHCR. After a successful build:
+
+1. Pull the latest images (or Kubernetes will pull automatically)
+2. Restart deployments to use new images:
+   ```bash
+   kubectl rollout restart deployment/backend
+   kubectl rollout restart deployment/frontend
+   ```
+
+## Setting up Ingress Controller
 
 For production-like setup with domain-based routing:
 
-#### 1. Install nginx-ingress
+### 1. Install nginx-ingress
 
 ```bash
 kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/main/deploy/static/provider/kind/deploy.yaml
@@ -331,7 +330,7 @@ kubectl wait --namespace ingress-nginx \
   --timeout=90s
 ```
 
-#### 2. Create Ingress Resource
+### 2. Create Ingress Resource
 
 Create `ingress.yaml`:
 
@@ -371,19 +370,19 @@ Apply:
 kubectl apply -f ingress.yaml
 ```
 
-#### 3. Update /etc/hosts
+### 3. Update /etc/hosts
 
 Add to `/etc/hosts`:
 ```
 127.0.0.1 unidash.local
 ```
 
-#### 4. Access Application
+### 4. Access Application
 
 - Frontend: `http://unidash.local`
 - Backend API: `http://unidash.local/api`
 
-#### 5. Enable TLS/SSL with cert-manager
+### 5. Enable TLS/SSL with cert-manager
 
 Install cert-manager:
 ```bash
@@ -420,26 +419,11 @@ spec:
     # ... rest of configuration
 ```
 
-### Storage Options for Production
+## Future Production Enhancements
 
-#### 1. NFS Persistent Volumes
+### Storage Options
 
-```yaml
-apiVersion: v1
-kind: PersistentVolume
-metadata:
-  name: postgres-pv-nfs
-spec:
-  capacity:
-    storage: 10Gi
-  accessModes:
-    - ReadWriteMany
-  nfs:
-    server: nfs-server.example.com
-    path: "/exported/path"
-```
-
-#### 2. Cloud Provider Storage
+#### Cloud Provider Storage
 
 **AWS EBS:**
 ```yaml
@@ -468,40 +452,7 @@ spec:
   storageClassName: managed-premium
 ```
 
-#### 3. Ceph with Rook
-
-Install Rook operator and use CephBlockPool for PostgreSQL storage.
-
-### High Availability Setup
-
-#### PostgreSQL StatefulSet with Replication
-
-Replace Deployment with StatefulSet:
-
-```yaml
-apiVersion: apps/v1
-kind: StatefulSet
-metadata:
-  name: postgres
-spec:
-  serviceName: postgres
-  replicas: 3
-  selector:
-    matchLabels:
-      app: postgres
-  template:
-    # ... pod template
-  volumeClaimTemplates:
-  - metadata:
-      name: postgres-storage
-    spec:
-      accessModes: [ "ReadWriteOnce" ]
-      resources:
-        requests:
-          storage: 10Gi
-```
-
-Use PostgreSQL streaming replication or tools like Patroni for HA.
+### High Availability
 
 #### Backend Horizontal Pod Autoscaling
 
@@ -526,32 +477,9 @@ spec:
         averageUtilization: 70
 ```
 
-#### Frontend Horizontal Pod Autoscaling
+### Resource Limits
 
-```yaml
-apiVersion: autoscaling/v2
-kind: HorizontalPodAutoscaler
-metadata:
-  name: frontend-hpa
-spec:
-  scaleTargetRef:
-    apiVersion: apps/v1
-    kind: Deployment
-    name: frontend
-  minReplicas: 2
-  maxReplicas: 5
-  metrics:
-  - type: Resource
-    resource:
-      name: cpu
-      target:
-        type: Utilization
-        averageUtilization: 70
-```
-
-### Resource Limits and Requests
-
-Add to deployments for production:
+Add to deployments:
 
 ```yaml
 spec:
@@ -591,163 +519,11 @@ readinessProbe:
   periodSeconds: 5
 ```
 
-**Frontend:**
-```yaml
-livenessProbe:
-  httpGet:
-    path: /
-    port: 3000
-  initialDelaySeconds: 30
-  periodSeconds: 10
-readinessProbe:
-  httpGet:
-    path: /
-    port: 3000
-  initialDelaySeconds: 5
-  periodSeconds: 5
-```
-
-### Monitoring and Observability
-
-#### Prometheus and Grafana
-
-1. Install Prometheus Operator:
-   ```bash
-   kubectl apply -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/main/bundle.yaml
-   ```
-
-2. Create ServiceMonitor for backend:
-   ```yaml
-   apiVersion: monitoring.coreos.com/v1
-   kind: ServiceMonitor
-   metadata:
-     name: backend-metrics
-   spec:
-     selector:
-       matchLabels:
-         component: backend
-     endpoints:
-     - port: http
-       path: /metrics
-   ```
-
-3. Install Grafana and import dashboards
-
-#### Logging with Loki
-
-1. Install Loki stack:
-   ```bash
-   helm install loki grafana/loki-stack
-   ```
-
-2. Configure log aggregation from all pods
-
-### Security Enhancements
-
-#### Network Policies
-
-Restrict pod-to-pod communication:
-
-```yaml
-apiVersion: networking.k8s.io/v1
-kind: NetworkPolicy
-metadata:
-  name: backend-network-policy
-spec:
-  podSelector:
-    matchLabels:
-      component: backend
-  policyTypes:
-  - Ingress
-  - Egress
-  ingress:
-  - from:
-    - podSelector:
-        matchLabels:
-          component: frontend
-    ports:
-    - protocol: TCP
-      port: 3333
-  egress:
-  - to:
-    - podSelector:
-        matchLabels:
-          component: postgres
-    ports:
-    - protocol: TCP
-      port: 5432
-```
-
-#### External Secrets Management
-
-Use External Secrets Operator with AWS Secrets Manager, Azure Key Vault, or HashiCorp Vault:
-
-```yaml
-apiVersion: external-secrets.io/v1beta1
-kind: SecretStore
-metadata:
-  name: aws-secrets
-spec:
-  provider:
-    aws:
-      service: SecretsManager
-      region: us-east-1
----
-apiVersion: external-secrets.io/v1beta1
-kind: ExternalSecret
-metadata:
-  name: backend-secret
-spec:
-  secretStoreRef:
-    name: aws-secrets
-  target:
-    name: backend-secret
-  data:
-  - secretKey: JWT_PRIVATE_KEY
-    remoteRef:
-      key: unidash/jwt-private-key
-```
-
-### CI/CD Integration
-
-Example GitHub Actions workflow:
-
-```yaml
-name: Deploy to Kubernetes
-on:
-  push:
-    branches: [main]
-
-jobs:
-  deploy:
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v2
-
-    - name: Build images
-      run: |
-        docker build -t unidash-api:${{ github.sha }} backend/
-        docker build -t unidash-app:${{ github.sha }} frontend/
-
-    - name: Push to registry
-      run: |
-        # Push to your container registry
-
-    - name: Update K8s manifests
-      run: |
-        sed -i 's|unidash-api:latest|unidash-api:${{ github.sha }}|g' kubernetes/backend/backend-deployment.yaml
-        sed -i 's|unidash-app:latest|unidash-app:${{ github.sha }}|g' kubernetes/frontend/frontend-deployment.yaml
-
-    - name: Deploy to K8s
-      run: |
-        kubectl apply -f kubernetes/
-```
-
 ## Additional Resources
 
 - [Kubernetes Documentation](https://kubernetes.io/docs/)
 - [Kind Documentation](https://kind.sigs.k8s.io/)
+- [GitHub Container Registry Documentation](https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-container-registry)
 - [NestJS Documentation](https://docs.nestjs.com/)
 - [Next.js Documentation](https://nextjs.org/docs)
 - [PostgreSQL on Kubernetes](https://www.postgresql.org/docs/current/)
-- [Prisma Migrations](https://www.prisma.io/docs/concepts/components/prisma-migrate)
