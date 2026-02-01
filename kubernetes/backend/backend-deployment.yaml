@@ -1,0 +1,72 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend
+  labels:
+    app: unidash
+    component: backend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: unidash
+      component: backend
+  template:
+    metadata:
+      labels:
+        app: unidash
+        component: backend
+    spec:
+      initContainers:
+      # Wait for PostgreSQL to be ready
+      - name: wait-for-postgres
+        image: docker.io/postgres:16
+        imagePullPolicy: IfNotPresent
+        command:
+        - sh
+        - -c
+        - |
+          echo "Waiting for PostgreSQL to be ready..."
+          max_attempts=60
+          attempt=0
+          while [ $attempt -lt $max_attempts ]; do
+            if pg_isready -h postgres-service -U postgres > /dev/null 2>&1; then
+              echo "PostgreSQL is ready!"
+              exit 0
+            fi
+            attempt=$((attempt + 1))
+            echo "Waiting for PostgreSQL... ($attempt/$max_attempts)"
+            sleep 1
+          done
+          echo "Error: PostgreSQL did not become ready in time."
+          exit 1
+        env:
+        - name: PGPASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: postgres-secret
+              key: POSTGRES_PASSWORD
+
+      # Run database migrations
+      - name: run-migrations
+        image: ghcr.io/marcospaul0/unidash-api:latest
+        imagePullPolicy: IfNotPresent
+        command: ["npx", "prisma", "migrate", "deploy"]
+        envFrom:
+        - configMapRef:
+            name: backend-config
+        - secretRef:
+            name: backend-secret
+
+      containers:
+      - name: backend
+        image: ghcr.io/marcospaul0/unidash-api:latest
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 3333
+          name: http
+        envFrom:
+        - configMapRef:
+            name: backend-config
+        - secretRef:
+            name: backend-secret

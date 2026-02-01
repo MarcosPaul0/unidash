@@ -18,7 +18,7 @@ services:
 
   postgres:
     container_name: unidash-pg
-    image: postgres:16
+    image: docker.io/postgres:16
     ports:
       - 5432:5432
     environment:
@@ -45,7 +45,7 @@ services:
   #     - backend-unidash
 
   mailhog:
-    image: mailhog/mailhog
+    image: docker.io/mailhog/mailhog
     container_name: mailhog
     restart: 'no'
     ports:

@@ -9,10 +9,10 @@ async function bootstrap() {
   const envService = app.get(EnvService);
   const port = envService.get('PORT');
 
-  const origin = envService.get('FRONTEND_BASE_URL');
+  const origins = envService.get('FRONTEND_BASE_URL').split(',').map(url => url.trim());
 
   app.enableCors({
-    origin: [origin],
+    origin: origins,
     credentials: true,
   });
 

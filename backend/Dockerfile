@@ -1,6 +1,6 @@
-FROM node:24.12.0 as builder
+FROM node:24.12.0 AS builder
 
-ENV NODE_ENV build
+ENV NODE_ENV=build
 
 WORKDIR /usr/app
 
@@ -27,12 +27,11 @@ RUN npx prisma generate \
 
 FROM node:21.5.0
 
-ENV NODE_ENV production
+ENV NODE_ENV=production
 
 WORKDIR /usr/app
 
 # Copiar arquivos do builder
-COPY --from=builder --chown=node:node /usr/app/.env ./
 COPY --from=builder --chown=node:node /usr/app/package*.json ./
 COPY --from=builder --chown=node:node /usr/app/node_modules/ ./node_modules/
 COPY --from=builder --chown=node:node /usr/app/dist/ ./dist/
