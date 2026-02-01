@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend
+  labels:
+    app: unidash
+    component: frontend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: unidash
+      component: frontend
+  template:
+    metadata:
+      labels:
+        app: unidash
+        component: frontend
+    spec:
+      containers:
+      - name: frontend
+        image: unidash-app:latest
+        ports:
+        - containerPort: 3000
+          name: http
+        env:
+        - name: NEXT_PUBLIC_API_URL
+          valueFrom:
+            configMapKeyRef:
+              name: frontend-config
+              key: NEXT_PUBLIC_API_URL
+        - name: NODE_ENV
+          value: "production"

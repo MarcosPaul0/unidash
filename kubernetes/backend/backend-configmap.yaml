@@ -1,0 +1,25 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: backend-config
+  labels:
+    app: unidash
+    component: backend
+data:
+  PORT: "3333"
+  # JWT Configuration (non-sensitive timing values)
+  JWT_ACCESS_TOKEN_EXPIRATION_SECONDS: "900"  # 15 minutes
+  JWT_INCOMING_STUDENT_EXPIRATION_DAYS: "7"
+  JWT_REFRESH_TOKEN_EXPIRATION_DAYS: "7"
+  REFRESH_TOKEN_COOKIE: "refreshToken"
+
+  # SMTP Configuration (non-sensitive)
+  SMTP_HOST: "mailhog"  # Change to actual SMTP host in production
+  SMTP_PORT: "1025"
+  SMTP_FROM: "noreply@unidash.com"
+
+  # Frontend URLs - UPDATE THESE VALUES
+  FRONTEND_BASE_URL: "http://localhost:30080"
+  ACCOUNT_ACTIVATION_URL: "http://localhost:30080/auth/activate"
+  PASSWORD_RESET_URL: "http://localhost:30080/auth/reset-password"
+  INCOMING_STUDENT_URL: "http://localhost:30080/incoming-students"

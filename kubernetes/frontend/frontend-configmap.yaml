@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: frontend-config
+  labels:
+    app: unidash
+    component: frontend
+data:
+  # Backend API URL - points to internal backend service
+  NEXT_PUBLIC_API_URL: "http://backend-service:3333"
