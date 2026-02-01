@@ -13,7 +13,13 @@ export const envSchema = z.object({
   SMTP_PASS: z.string(),
   SMTP_FROM: z.string(),
   SMTP_PORT: z.coerce.number(),
-  FRONTEND_BASE_URL: z.url(),
+  FRONTEND_BASE_URL: z.string().refine(
+    (val) => {
+      const urls = val.split(',').map(url => url.trim());
+      return urls.every(url => z.string().url().safeParse(url).success);
+    },
+    { message: 'Must be a valid URL or comma-separated list of URLs' }
+  ),
   ACCOUNT_ACTIVATION_URL: z.string(),
   PASSWORD_RESET_URL: z.string(),
   INCOMING_STUDENT_URL: z.string(),
