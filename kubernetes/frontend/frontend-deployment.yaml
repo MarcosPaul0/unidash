@@ -19,7 +19,8 @@ spec:
     spec:
       containers:
       - name: frontend
-        image: unidash-app:latest
+        image: ghcr.io/marcospaul0/unidash-app:latest
+        imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 3000
           name: http

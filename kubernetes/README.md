@@ -55,22 +55,54 @@ kubernetes/
    kind create cluster --name unidash
    ```
 
-2. **Docker images built**
+2. **GitHub Container Registry authentication**
    ```bash
-   # Build backend image
+   # Create a GitHub Personal Access Token with read:packages and write:packages permissions
+   # Then login to GHCR
+   echo $GITHUB_TOKEN | docker login ghcr.io -u marcospaul0 --password-stdin
+   ```
+
+3. **Build and push Docker images to GHCR**
+   ```bash
+   # Build and push backend image
    cd backend
-   docker build -t unidash-api:latest -f Dockerfile .
+   docker build -t ghcr.io/marcospaul0/unidash-api:latest -f Dockerfile .
+   docker push ghcr.io/marcospaul0/unidash-api:latest
 
-   # Build frontend image
-   cd frontend
-   docker build -t unidash-app:latest -f Dockerfile.prod .
+   # Build and push frontend image
+   cd ../frontend
+   docker build -t ghcr.io/marcospaul0/unidash-app:latest -f Dockerfile.prod .
+   docker push ghcr.io/marcospaul0/unidash-app:latest
    ```
 
-3. **Load images into Kind cluster**
+4. **Create image pull secret in Kubernetes** (if images are private)
    ```bash
-   kind load docker-image unidash-api:latest --name unidash
-   kind load docker-image unidash-app:latest --name unidash
+   kubectl create secret docker-registry ghcr-secret \
+     --docker-server=ghcr.io \
+     --docker-username=marcospaul0 \
+     --docker-password=$GITHUB_TOKEN \
+     --docker-email=your-email@example.com
    ```
+
+   If using private images, add to deployment specs:
+   ```yaml
+   spec:
+     imagePullSecrets:
+     - name: ghcr-secret
+   ```
+
+**Alternative: Local Development with Kind**
+
+For local development without pushing to GHCR:
+```bash
+# Build images locally with GHCR tags
+docker build -t ghcr.io/marcospaul0/unidash-api:latest -f backend/Dockerfile backend/
+docker build -t ghcr.io/marcospaul0/unidash-app:latest -f frontend/Dockerfile.prod frontend/
+
+# Load images directly into Kind cluster
+kind load docker-image ghcr.io/marcospaul0/unidash-api:latest --name unidash
+kind load docker-image ghcr.io/marcospaul0/unidash-app:latest --name unidash
+```
 
 ## Configuration
 

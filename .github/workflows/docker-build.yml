@@ -95,3 +95,8 @@ jobs:
           platforms: linux/amd64
           cache-from: type=gha
           cache-to: type=gha,mode=max
+          build-args: |
+            NEXT_PUBLIC_API_URL=${{ vars.NEXT_PUBLIC_API_URL || 'http://localhost:3333' }}
+            NEXT_PUBLIC_SERVER_SIDE_API_URL=${{ vars.NEXT_PUBLIC_SERVER_SIDE_API_URL || 'http://localhost:3333' }}
+            NEXT_PUBLIC_APP_URL=${{ vars.NEXT_PUBLIC_APP_URL || 'http://localhost:3000' }}
+            ITEMS_PER_PAGE=${{ vars.ITEMS_PER_PAGE || '12' }}

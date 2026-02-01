@@ -21,6 +21,7 @@ spec:
       # Wait for PostgreSQL to be ready
       - name: wait-for-postgres
         image: docker.io/postgres:16
+        imagePullPolicy: IfNotPresent
         command:
         - sh
         - -c
@@ -48,7 +49,8 @@ spec:
 
       # Run database migrations
       - name: run-migrations
-        image: unidash-api:latest
+        image: ghcr.io/marcospaul0/unidash-api:latest
+        imagePullPolicy: IfNotPresent
         command: ["npx", "prisma", "migrate", "deploy"]
         envFrom:
         - configMapRef:
@@ -58,7 +60,8 @@ spec:
 
       containers:
       - name: backend
-        image: unidash-api:latest
+        image: ghcr.io/marcospaul0/unidash-api:latest
+        imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 3333
           name: http

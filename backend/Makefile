@@ -56,3 +56,6 @@ clean: # Turn off the database and delete the database volume
 	@echo "Removing database volume..."
 	-podman volume rm backend_postgres
 	@echo "Database cleanup complete."
+
+build: # Build the backend Docker image
+	podman build -t ghcr.io/marcospaul0/unidash-backend:latest -f Dockerfile .
